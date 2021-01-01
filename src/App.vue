@@ -13,14 +13,12 @@ export default {
   name: "LayoutDefault",
 
   components: {
-    HelloWorld,
+    HelloWorld
   },
 
   data() {
-    return {
-      leftDrawerOpen: false,
-    };
-  },
+    return {};
+  }
 };
 </script>
 
