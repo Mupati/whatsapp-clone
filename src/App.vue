@@ -1,25 +1,42 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-page-container>
-      <HelloWorld msg="The Bare Necessities of Life" />
-    </q-page-container>
-  </q-layout>
+  <main class="main row">
+    <div class="col-3 main__left">
+      <UserNavBar />
+      <ChatList />
+    </div>
+
+    <div class="col main__center">
+      <NoSelectedMessage />
+    </div>
+
+    <div class="col-3 main__right" v-if="isVisibleRight">
+      <p>The chat right components</p>
+    </div>
+  </main>
 </template>
 
 <script>
-import HelloWorld from "./components/HelloWorld.vue";
-
 export default {
   name: "LayoutDefault",
-
   components: {
-    HelloWorld
+    NoSelectedMessage: () => import("./components/NoSelectedMessage.vue"),
+    ChatList: () => import("./components/ChatList.vue"),
+    UserNavBar: () => import("./components/UserNavBar.vue")
   },
 
   data() {
-    return {};
+    return {
+      isVisibleRight: false
+    };
   }
 };
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.main {
+  height: 100vh;
+  &__center {
+    background: #263238;
+  }
+}
+</style>
