@@ -1,12 +1,14 @@
 <template>
-  <q-toolbar class="text-primary">
+  <q-toolbar class="toolbar-color">
     <q-avatar class="q-ml-sm">
       <img src="../assets/default_avatar.png" />
     </q-avatar>
     <q-toolbar-title></q-toolbar-title>
 
-    <q-icon name="donut_large" color="green" size="sm" />
-    <q-icon name="chat" color="green" size="sm" class="q-ml-md" />
+    <q-btn flat round dense icon="donut_large" />
+    <div class="q-ml-sm"></div>
+    <q-btn flat round dense icon="chat" />
+    <div class="q-mr-sm"></div>
     <q-btn flat round dense icon="more_vert" />
   </q-toolbar>
 </template>
@@ -15,4 +17,9 @@
 export default {};
 </script>
 
-<style></style>
+<style lang="scss" scoped>
+.toolbar-color {
+  color: #b1b3b5;
+  background: #323739;
+}
+</style>
