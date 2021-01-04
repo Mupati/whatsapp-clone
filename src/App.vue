@@ -27,7 +27,7 @@ export default {
   data() {
     return {
       isVisibleRight: false,
-      isUserSelected: true
+      isUserSelected: false
     };
   }
 };
