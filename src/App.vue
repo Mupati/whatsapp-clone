@@ -30,6 +30,10 @@ export default {
       isVisibleRight: true,
       isUserSelected: true
     };
+  },
+
+  mounted() {
+    document.title = "Wossop - Kofi Mupati";
   }
 };
 </script>
