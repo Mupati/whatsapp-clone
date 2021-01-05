@@ -10,7 +10,7 @@
     </div>
 
     <div class="col-3 main__right" v-if="isVisibleRight">
-      <p>The chat right components</p>
+      <UserProfile />
     </div>
   </main>
 </template>
@@ -21,13 +21,14 @@ export default {
   components: {
     NoSelectedMessage: () => import("./components/NoSelectedMessage.vue"),
     ChatList: () => import("./components/ChatList.vue"),
-    ChatArea: () => import("./components/ChatArea.vue")
+    ChatArea: () => import("./components/ChatArea.vue"),
+    UserProfile: () => import("./components/UserProfile")
   },
 
   data() {
     return {
-      isVisibleRight: false,
-      isUserSelected: false
+      isVisibleRight: true,
+      isUserSelected: true
     };
   }
 };

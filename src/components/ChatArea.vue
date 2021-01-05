@@ -1,18 +1,27 @@
 <template>
   <section id="wrapper">
-    <q-toolbar class="chat-area-toolbar">
-      <q-avatar class="q-ml-sm">
+    <q-toolbar class="chat-area-toolbar cursor-pointer">
+      <q-avatar class="q-ml-sm cursor-pointer">
         <img src="../assets/default_avatar.png" />
       </q-avatar>
+      <q-item>
+        <q-item-section>
+          <q-item-label class="text-subtitle1" style="color: #fff"
+            >Bra Medo</q-item-label
+          >
+          <q-item-label caption class="text-primary"
+            >Last seen today at 10:18PM</q-item-label
+          >
+        </q-item-section>
+      </q-item>
       <q-toolbar-title></q-toolbar-title>
-
       <q-btn flat round dense icon="search" />
       <div class="q-mr-md"></div>
       <q-btn flat round dense icon="more_vert" />
     </q-toolbar>
 
-    <div class="messaging-area q-pa-md row justify-center">
-      <div style="width: 100%" class="messaging-area__chat">
+    <div class="messaging-area row justify-center">
+      <div style="width: 100%" class="messaging-area__chat q-px-xl q-py-md">
         <q-chat-message :text="['hey, how are you?']" sent />
         <q-chat-message :text="['doing fine, how r you?']" />
       </div>

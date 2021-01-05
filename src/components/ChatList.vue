@@ -1,7 +1,7 @@
 <template>
   <section id="wrapper">
-    <q-toolbar class="list-toolbar">
-      <q-avatar class="q-ml-sm">
+    <q-toolbar class="list-toolbar" style="height: 64.2812px">
+      <q-avatar class="q-ml-sm cursor-pointer">
         <img src="../assets/default_avatar.png" />
       </q-avatar>
       <q-toolbar-title></q-toolbar-title>
