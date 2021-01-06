@@ -1,35 +1,31 @@
 <template>
-  <main class="main row">
-    <div class="col-3 main__left">
-      <ChatList />
-    </div>
-
-    <div class="col main__center">
-      <ChatArea v-if="isUserSelected" />
-      <NoSelectedMessage v-else />
-    </div>
-
-    <div class="col-3 main__right" v-if="isVisibleRight">
-      <UserProfile />
-    </div>
+  <main>
+    <AuthApp v-if="isLoggedIn" />
+    <NonAuthApp v-else />
   </main>
 </template>
 
 <script>
+import AuthApp from "./components/AuthApp";
+import NonAuthApp from "./components/NonAuthApp";
+
+import { getToken } from "./api";
 export default {
-  name: "LayoutDefault",
+  name: "MainApp",
   components: {
-    NoSelectedMessage: () => import("./components/NoSelectedMessage.vue"),
-    ChatList: () => import("./components/ChatList.vue"),
-    ChatArea: () => import("./components/ChatArea.vue"),
-    UserProfile: () => import("./components/UserProfile")
+    AuthApp,
+    NonAuthApp
+  },
+  data() {
+    return {};
   },
 
-  data() {
-    return {
-      isVisibleRight: true,
-      isUserSelected: true
-    };
+  methods: {},
+
+  computed: {
+    isLoggedIn() {
+      return !!getToken();
+    }
   },
 
   mounted() {
@@ -38,19 +34,11 @@ export default {
 };
 </script>
 
-<style lang="scss">
-body {
-  background: #090e11;
+<style lang="scss" scoped>
+main {
+  // background: #090e11;
   box-sizing: border-box;
   height: 100vh;
   padding: 1% 7.5% 0;
-}
-.main {
-  height: 100%;
-  background: #131c21;
-  color: #f1f1f2a1;
-  &__center {
-    height: 100%;
-  }
 }
 </style>
