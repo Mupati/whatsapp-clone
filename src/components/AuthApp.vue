@@ -1,16 +1,30 @@
 <template>
   <section class="main row">
     <div class="col-3 main__left">
-      <ChatList />
+      <AuthUserProfile
+        v-if="leftComponent === 'profile'"
+        @showChatList="leftComponent = 'chat-list'"
+      />
+      <ChatList
+        v-if="leftComponent === 'chat-list'"
+        @handleLeftNavigation="handleLeftNavigation"
+        @selectUser="isUserSelected = true"
+      />
     </div>
 
     <div class="col main__center">
-      <ChatArea v-if="isUserSelected" />
+      <ChatArea
+        v-if="isUserSelected"
+        @handleRightNavigation="handleRightNavigation"
+      />
       <NoSelectedMessage v-else />
     </div>
 
     <div class="col-3 main__right" v-if="isVisibleRight">
-      <UserProfile />
+      <SelectedUserProfile
+        v-if="rightComponent === 'user-profile'"
+        @hideRightSection="isVisibleRight = false"
+      />
     </div>
   </section>
 </template>
@@ -18,26 +32,38 @@
 <script>
 import { getUser } from "../api";
 export default {
-  name: "LayoutDefault",
+  name: "AuthApp",
   components: {
     NoSelectedMessage: () => import("./NoSelectedMessage.vue"),
     ChatList: () => import("./ChatList.vue"),
     ChatArea: () => import("./ChatArea.vue"),
-    UserProfile: () => import("./UserProfile")
+    SelectedUserProfile: () => import("./SelectedUserProfile"),
+    AuthUserProfile: () => import("./AuthUserProfile")
   },
 
   data() {
     return {
-      isVisibleRight: true,
-      isUserSelected: true,
+      leftComponent: "chat-list",
+      rightComponent: "user-profile",
+      isVisibleRight: false,
+      isUserSelected: false,
       authUser: null
     };
   },
 
   methods: {
     async fetchUserData() {
-      const authUser = getUser();
-      this.authUserInfo = authUser.data;
+      const res = getUser();
+      this.authUser = res.data;
+    },
+
+    handleLeftNavigation(leftComponentName) {
+      this.leftComponent = leftComponentName;
+    },
+
+    handleRightNavigation(rightComponentName) {
+      this.isVisibleRight = true;
+      this.rightComponent = rightComponentName;
     }
   }
 };

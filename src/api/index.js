@@ -1,15 +1,10 @@
 import axios from "axios";
-// import Cookie from "js-cookie";
 
 const Api = axios.create({
   baseURL: "http://127.0.0.1:8000/api"
 });
 
 Api.defaults.withCredentials = true;
-
-// const fetchCookie = () => Api.get("/csrf-cookie");
-
-// const fetchAuthToken = () => Api.get;
 
 export const doRegister = async data => {
   return Api.post("/register", data);

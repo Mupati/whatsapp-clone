@@ -39,6 +39,6 @@ main {
   // background: #090e11;
   box-sizing: border-box;
   height: 100vh;
-  padding: 1% 7.5% 0;
+  // padding: 1% 7.5% 1%;
 }
 </style>

@@ -1,7 +1,7 @@
 <template>
   <section id="wrapper">
     <q-toolbar class="profile-toolbar" style="height: 64.2812px">
-      <q-btn flat round dense icon="close" />
+      <q-btn flat round dense icon="close" @click="hideRightSection" />
       <q-toolbar-title>Contact info</q-toolbar-title>
     </q-toolbar>
 
@@ -61,10 +61,16 @@
 
 <script>
 export default {
+  name: "SelectedUserProfile",
   data() {
     return {
       isMutedNotification: false
     };
+  },
+  methods: {
+    hideRightSection() {
+      this.$emit("hideRightSection");
+    }
   }
 };
 </script>
