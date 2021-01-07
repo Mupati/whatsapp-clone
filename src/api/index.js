@@ -6,6 +6,8 @@ const Api = axios.create({
 
 Api.defaults.withCredentials = true;
 
+const tokenName = process.env.VUE_APP_TOKEN_NAME;
+
 export const doRegister = async data => {
   return Api.post("/register", data);
 };
@@ -39,11 +41,11 @@ export const getUser = () =>
   });
 
 export const storeToken = token => {
-  localStorage.setItem("wossop_token", token);
+  localStorage.setItem(tokenName, token);
 };
 
 export const clearToken = () => {
-  localStorage.removeItem("wossop_token");
+  localStorage.removeItem(tokenName);
 };
 
-export const getToken = () => localStorage.getItem("wossop_token");
+export const getToken = () => localStorage.getItem(tokenName);
