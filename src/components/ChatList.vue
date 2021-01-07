@@ -43,7 +43,7 @@
             <q-item clickable v-close-popup class="q-pl-lg">
               <q-item-section>Settings</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup class="q-pl-lg">
+            <q-item clickable v-close-popup class="q-pl-lg" @click="logoutUser">
               <q-item-section>Log out</q-item-section>
             </q-item>
           </q-list>
@@ -66,8 +66,6 @@
             }"
             bg-color="dark"
           >
-            <!-- style="background-color: #323739; border-radius: 29px"
-            class="text-primary" -->
             <template v-slot:prepend>
               <q-icon name="search" style="color: #b1b3b5" />
             </template>
@@ -109,6 +107,7 @@
 </template>
 
 <script>
+import { doLogout } from "../api";
 const contacts = [
   {
     id: 1,
@@ -211,6 +210,11 @@ export default {
 
     selectUser(userId) {
       this.$emit("selectUser", userId);
+    },
+
+    async logoutUser() {
+      await doLogout();
+      this.$root.$emit("logoutUser");
     }
   }
 };

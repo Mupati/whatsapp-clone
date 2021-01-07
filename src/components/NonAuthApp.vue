@@ -17,7 +17,7 @@
       ]"
     />
     <q-form @submit="submitForm">
-      <q-card class="q-pa-xl" flat>
+      <q-card class="q-pa-xl" flat bordered no-border-radius>
         <div class="row q-mb-md" v-if="signUpMode === 'register'">
           <q-input
             square
@@ -116,6 +116,7 @@ export default {
         };
         const res = await doLogin(data);
         storeToken(res.data.token);
+        this.$root.$emit("loginUser");
       } catch (error) {
         console.log(error.response.data);
       }

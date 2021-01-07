@@ -17,19 +17,22 @@ export default {
     NonAuthApp
   },
   data() {
-    return {};
+    return {
+      isLoggedIn: !!getToken()
+    };
   },
 
   methods: {},
 
-  computed: {
-    isLoggedIn() {
-      return !!getToken();
-    }
-  },
-
   mounted() {
     document.title = "Wossop - Kofi Mupati";
+    this.$root.$on("logoutUser", () => {
+      this.isLoggedIn = false;
+    });
+
+    this.$root.$on("loginUser", () => {
+      this.isLoggedIn = true;
+    });
   }
 };
 </script>

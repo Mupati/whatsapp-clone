@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const Api = axios.create({
-  baseURL: "http://127.0.0.1:8000/api"
+  baseURL: process.env.VUE_APP_BASE_URL
 });
 
 Api.defaults.withCredentials = true;
@@ -14,10 +14,27 @@ export const doLogin = async data => {
   return Api.post("/login", data);
 };
 
-export const getUser = token =>
+export const doLogout = async () => {
+  try {
+    await Api.post(
+      "/logout",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      }
+    );
+    clearToken();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const getUser = () =>
   Api.get("/user", {
     headers: {
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${getToken()}`
     }
   });
 
