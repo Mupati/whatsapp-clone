@@ -57,14 +57,19 @@
           <q-input
             rounded
             dense
-            filled
+            standout
             placeholder="Search or start a new chat"
-            style="background-color: #323739; border-radius: 29px"
-            class="text-primary"
             :loading="isLoading"
+            :input-style="{
+              'padding-right': '20px',
+              color: '#f1f1f2'
+            }"
+            bg-color="dark"
           >
+            <!-- style="background-color: #323739; border-radius: 29px"
+            class="text-primary" -->
             <template v-slot:prepend>
-              <q-icon name="search" />
+              <q-icon name="search" style="color: #b1b3b5" />
             </template>
           </q-input>
         </q-item-section>

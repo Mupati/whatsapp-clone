@@ -17,7 +17,7 @@
       ]"
     />
     <q-form @submit="submitForm">
-      <q-card class="q-pa-xl">
+      <q-card class="q-pa-xl" flat>
         <div class="row q-mb-md" v-if="signUpMode === 'register'">
           <q-input
             square

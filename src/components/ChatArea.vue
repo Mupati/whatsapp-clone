@@ -18,6 +18,9 @@
         </q-item-section>
       </q-item>
       <q-space />
+      <q-btn flat round dense icon="videocam" class="z-top" />
+      <q-btn flat round dense icon="call" class="q-ml-md q-mr-xl" />
+
       <q-btn flat round dense icon="search" />
       <div class="q-mr-md"></div>
       <q-btn flat round dense icon="more_vert">
@@ -25,6 +28,7 @@
           :offset="[180, 0]"
           :content-class="['no-border-radius']"
           :content-style="{ 'background-color': '#2a2f32', width: '200px' }"
+          no-parent-event
         >
           <q-list style="color: #d4d5d7">
             <q-item
@@ -63,32 +67,66 @@
         </div>
       </q-scroll-area>
     </div>
-    <div class="messaging-input q-px-md">
+    <div class="messaging-input q-px-md q-pt-sm">
       <q-input
         rounded
-        standout
         dense
-        filled
+        standout
+        hide-bottom-space
         placeholder="Type a message"
-        class="text-primary"
+        :input-style="{
+          'padding-right': '20px',
+          color: '#f1f1f2'
+        }"
+        bg-color="dark"
         v-model="message"
       >
         <template v-slot:before>
-          <q-btn flat round dense icon="sentiment_satisfied_alt" />
+          <q-btn
+            flat
+            round
+            dense
+            icon="sentiment_satisfied_alt"
+            style="color: #b1b3b5"
+          />
           <q-fab
             icon="attach_file"
             direction="up"
             flat
             unelevated
             padding="5px"
+            style="color: #b1b3b5"
           >
-            <q-fab-action color="amber" text-color="black" icon="mail" />
-            <q-fab-action color="amber" text-color="black" icon="alarm" />
+            <q-fab-action
+              color="accent"
+              glossy
+              text-color="white"
+              icon="image"
+            />
+            <q-fab-action
+              color="positive"
+              text-color="white"
+              icon="camera_alt"
+            />
+            <q-fab-action
+              color="amber"
+              text-color="white"
+              icon="insert_drive_file"
+            />
+            <q-fab-action color="negative" text-color="white" icon="contacts" />
+            <q-fab-action color="info" text-color="white" icon="video_call" />
           </q-fab>
         </template>
         <template v-slot:after>
-          <q-btn flat round dense icon="send" v-if="message" />
-          <q-btn flat round dense icon="mic" v-else />
+          <q-btn
+            flat
+            round
+            dense
+            icon="send"
+            v-if="message"
+            style="color: #b1b3b5"
+          />
+          <q-btn flat round dense icon="mic" v-else style="color: #b1b3b5" />
         </template>
       </q-input>
     </div>
@@ -135,10 +173,17 @@ export default {
     isolation: isolate;
   }
 }
-
 .messaging-input {
-  @include generic-bg;
+  color: #b1b3b5;
+  background-color: #1e2428;
   flex-grow: 1;
   align-items: center;
+}
+
+.chat-input {
+  padding-left: 20px;
+  // border-radius: 30px;
+  color: #b1b3b5;
+  background-color: blue;
 }
 </style>
