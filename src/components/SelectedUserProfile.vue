@@ -16,7 +16,7 @@
           style="border-radius: 50%"
           class="block q-mx-auto q-mt-md"
         />
-        <div class="text-h6">Bra Medo</div>
+        <div class="text-h6">{{ userInfo.name }}</div>
         <div class="text-subtitle2">Last seen today at 10:30PM</div>
       </q-card-section>
     </q-card>
@@ -62,6 +62,7 @@
 <script>
 export default {
   name: "SelectedUserProfile",
+  props: ["userInfo"],
   data() {
     return {
       isMutedNotification: false

@@ -40,6 +40,13 @@ export const getUser = () =>
     }
   });
 
+export const getUsers = () =>
+  Api.get("/users", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  });
+
 export const storeToken = token => {
   localStorage.setItem(tokenName, token);
 };

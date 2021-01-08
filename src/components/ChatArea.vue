@@ -9,9 +9,9 @@
       </q-avatar>
       <q-item>
         <q-item-section>
-          <q-item-label class="text-subtitle1" style="color: #fff"
-            >Bra Medo</q-item-label
-          >
+          <q-item-label class="text-subtitle1" style="color: #fff">{{
+            userInfo.name
+          }}</q-item-label>
           <q-item-label caption class="text-primary"
             >Last seen today at 10:18PM</q-item-label
           >
@@ -23,43 +23,54 @@
 
       <q-btn flat round dense icon="search" />
       <div class="q-mr-md"></div>
-      <q-btn flat round dense icon="more_vert">
-        <q-menu
-          :offset="[180, 0]"
-          :content-class="['no-border-radius']"
-          :content-style="{ 'background-color': '#2a2f32', width: '200px' }"
-          no-parent-event
-        >
-          <q-list style="color: #d4d5d7">
-            <q-item
-              clickable
-              v-close-popup
-              class="q-pl-lg"
-              @click="selectMenu('user-profile')"
-            >
-              <q-item-section>Contact info</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup class="q-pl-lg">
-              <q-item-section>Select messages</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup class="q-pl-lg">
-              <q-item-section>Mute notifications</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup class="q-pl-lg">
-              <q-item-section>Clear messages</q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup class="q-pl-lg">
-              <q-item-section>Delete chat</q-item-section>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </q-btn>
+      <q-btn
+        flat
+        round
+        dense
+        icon="more_vert"
+        @click.stop="isShowingChatMenu = true"
+      />
     </q-toolbar>
+
+    <div>
+      <q-menu
+        anchor="bottom right"
+        self="top end"
+        :offset="[-28, -17]"
+        :content-class="['no-border-radius']"
+        :content-style="{ 'background-color': '#2a2f32', width: '200px' }"
+        v-model="isShowingChatMenu"
+      >
+        <q-list style="color: #d4d5d7">
+          <q-item
+            clickable
+            v-close-popup
+            class="q-pl-lg"
+            @click="selectMenu('user-profile')"
+          >
+            <q-item-section>Contact info</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup class="q-pl-lg">
+            <q-item-section>Select messages</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup class="q-pl-lg">
+            <q-item-section>Mute notifications</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup class="q-pl-lg">
+            <q-item-section>Clear messages</q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup class="q-pl-lg">
+            <q-item-section>Delete chat</q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
+    </div>
 
     <div class="messaging-area row justify-center">
       <q-scroll-area
         style="width: 100%"
         class="messaging-area__chat q-px-xl q-py-md"
+        ref="chatScroll"
       >
         <div v-for="i in 20" :key="i">
           <q-chat-message :text="['hey, how are you?']" sent />
@@ -72,7 +83,7 @@
         rounded
         dense
         standout
-        hide-bottom-space
+        autogrow
         placeholder="Type a message"
         :input-style="{
           'padding-right': '20px',
@@ -135,16 +146,28 @@
 
 <script>
 export default {
+  props: ["userInfo"],
   data() {
     return {
-      message: null
+      message: null,
+      isShowingChatMenu: false
     };
   },
 
   methods: {
+    scrollToChatBottom() {
+      const scrollArea = this.$refs.chatScroll;
+      const scrollTarget = scrollArea.getScrollTarget();
+      const duration = 300;
+      scrollArea.setScrollPosition(scrollTarget.scrollHeight, duration);
+    },
     selectMenu(itemName) {
       this.$emit("handleRightNavigation", itemName);
     }
+  },
+
+  mounted() {
+    this.scrollToChatBottom();
   }
 };
 </script>

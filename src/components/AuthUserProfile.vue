@@ -20,7 +20,7 @@
           class="block q-mx-auto q-mt-md q-mb-xl"
         />
         <div class="text-subtitle2">Your Name</div>
-        <div class="text-subtitle1">Bra Krox Effectx</div>
+        <div class="text-subtitle1">{{ authUser.name }}</div>
       </q-card-section>
     </q-card>
 
@@ -42,6 +42,8 @@
 
 <script>
 export default {
+  name: "AuthUserProfile",
+  props: ["authUser"],
   data() {
     return {
       isMutedNotification: false

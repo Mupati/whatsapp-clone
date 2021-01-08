@@ -116,7 +116,7 @@ export default {
         };
         const res = await doLogin(data);
         storeToken(res.data.token);
-        this.$root.$emit("loginUser");
+        this.$root.$emit("loginUser", res.data.user);
       } catch (error) {
         console.log(error.response.data);
       }

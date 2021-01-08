@@ -1,11 +1,7 @@
 <template>
   <section id="wrapper">
     <q-toolbar class="list-toolbar" style="height: 64.2812px">
-      <q-avatar
-        class="q-ml-sm cursor-pointer"
-        @click="selectMenu('profile')"
-        itemName
-      >
+      <q-avatar class="q-ml-sm cursor-pointer" @click="selectMenu('profile')">
         <img src="../assets/default_avatar.png" />
       </q-avatar>
       <q-space />
@@ -77,7 +73,7 @@
     <q-scroll-area style="height: calc(100% - 122.2656px)">
       <q-list bordered separator>
         <q-item
-          v-for="contact in contacts"
+          v-for="contact in allUsers"
           :key="contact.id"
           class="q-my-sm"
           clickable
@@ -85,9 +81,7 @@
           @click="selectUser(contact.id)"
         >
           <q-item-section avatar>
-            <q-avatar color="primary" text-color="white">
-              {{ contact.letter }}
-            </q-avatar>
+            <q-avatar color="primary" text-color="white"> K </q-avatar>
           </q-item-section>
 
           <q-item-section>
@@ -108,94 +102,14 @@
 
 <script>
 import { doLogout } from "../api";
-const contacts = [
-  {
-    id: 1,
-    name: "Ruddy Jedrzej",
-    email: "rjedrzej0@discuz.net",
-    letter: "R"
-  },
-  {
-    id: 2,
-    name: "Mallorie Alessandrini",
-    email: "malessandrini1@marketwatch.com",
-    letter: "M"
-  },
-  {
-    id: 3,
-    name: "Elisabetta Wicklen",
-    email: "ewicklen2@microsoft.com",
-    letter: "E"
-  },
-  {
-    id: 4,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 5,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 6,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 7,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 8,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 9,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 10,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 11,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 12,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  },
-  {
-    id: 13,
-    name: "Seka Fawdrey",
-    email: "sfawdrey3@wired.com",
-    letter: "S"
-  }
-];
 
 export default {
   name: "ChatList",
-  props: ["authUser"],
+  props: ["users"],
   data() {
     return {
-      contacts,
-      isLoading: false
+      isLoading: false,
+      allUsers: this.users
     };
   },
 
@@ -209,14 +123,29 @@ export default {
     },
 
     selectUser(userId) {
-      this.$emit("selectUser", userId);
+      let selectedUserInfo = this.allUsers.filter(user => user.id === userId);
+      this.$emit("selectUser", selectedUserInfo[0]);
     },
 
     async logoutUser() {
       await doLogout();
       this.$root.$emit("logoutUser");
     }
+
+    // async fetchAllUsers() {
+    //   try {
+    //     const response = await getUsers();
+    //     console.log("chat list fetch all users");
+    //     this.allUsers = response.data;
+    //   } catch (error) {
+    //     console.log(error);
+    //   }
+    // }
   }
+  // mounted() {
+  //   let allUsersAvailable = Boolean(this.users);
+  //   if (!allUsersAvailable) this.fetchAllUsers();
+  // }
 };
 </script>
 <style lang="scss" scoped>

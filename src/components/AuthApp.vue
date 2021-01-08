@@ -4,11 +4,13 @@
       <AuthUserProfile
         v-if="leftComponent === 'profile'"
         @showChatList="leftComponent = 'chat-list'"
+        :authUser="user"
       />
       <ChatList
-        v-if="leftComponent === 'chat-list'"
+        v-if="leftComponent === 'chat-list' && allUsers"
+        :users="allUsers"
         @handleLeftNavigation="handleLeftNavigation"
-        @selectUser="isUserSelected = true"
+        @selectUser="handleSelectUser"
       />
     </div>
 
@@ -16,6 +18,7 @@
       <ChatArea
         v-if="isUserSelected"
         @handleRightNavigation="handleRightNavigation"
+        :userInfo="selectedUserInfo"
       />
       <NoSelectedMessage v-else />
     </div>
@@ -24,15 +27,17 @@
       <SelectedUserProfile
         v-if="rightComponent === 'user-profile'"
         @hideRightSection="isVisibleRight = false"
+        :userInfo="selectedUserInfo"
       />
     </div>
   </section>
 </template>
 
 <script>
-import { getUser } from "../api";
+import { getUser, getUsers } from "../api";
 export default {
   name: "AuthApp",
+  props: ["authUser"],
   components: {
     NoSelectedMessage: () => import("./NoSelectedMessage.vue"),
     ChatList: () => import("./ChatList.vue"),
@@ -47,14 +52,30 @@ export default {
       rightComponent: "user-profile",
       isVisibleRight: false,
       isUserSelected: false,
-      authUser: null
+      selectedUserInfo: null,
+      user: this.authUser,
+      allUsers: null
     };
   },
 
   methods: {
     async fetchUserData() {
-      const res = getUser();
-      this.authUser = res.data;
+      try {
+        const res = await getUser();
+        this.user = res.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    fetchAllUsersData() {
+      return getUsers()
+        .then(res => {
+          console.log("AuthApp.vue fetch all users");
+          this.allUsers = res.data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
 
     handleLeftNavigation(leftComponentName) {
@@ -64,7 +85,19 @@ export default {
     handleRightNavigation(rightComponentName) {
       this.isVisibleRight = true;
       this.rightComponent = rightComponentName;
+    },
+
+    handleSelectUser(userInfo) {
+      this.isUserSelected = true;
+      this.selectedUserInfo = userInfo;
     }
+  },
+
+  mounted() {
+    let isUser = Boolean(this.user);
+    if (!isUser) this.fetchUserData();
+
+    this.fetchAllUsersData();
   }
 };
 </script>
