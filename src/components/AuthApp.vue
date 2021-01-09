@@ -34,7 +34,12 @@
 </template>
 
 <script>
-import { getUser, getUsers } from "../api";
+// import Peer from "simple-peer";
+import Echo from "laravel-echo";
+import axios from "axios";
+import { getUser, getUsers, getToken } from "../api";
+window.Pusher = require("pusher-js");
+
 export default {
   name: "AuthApp",
   props: ["authUser"],
@@ -54,7 +59,8 @@ export default {
       isUserSelected: false,
       selectedUserInfo: null,
       user: this.authUser,
-      allUsers: null
+      allUsers: null,
+      onlineChannel: null
     };
   },
 
@@ -90,6 +96,54 @@ export default {
     handleSelectUser(userInfo) {
       this.isUserSelected = true;
       this.selectedUserInfo = userInfo;
+    },
+
+    initializeChannel() {
+      // window.Echo = new Echo({
+      //   broadcaster: "pusher",
+      //   key: process.env.VUE_APP_PUSHER_APP_KEY,
+      //   authEndpoint: `${process.env.VUE_APP_BASE_URL}/broadcasting/auth`,
+      //   cluster: "mt1",
+      //   auth: {
+      // headers: {
+      //   Authorization: `Bearer ${getToken()}`,
+      // },
+      //   },
+      // });
+
+      window.Echo = new Echo({
+        broadcaster: "pusher",
+        cluster: process.env.VUE_APP_PUSHER_CLUSTER,
+        encrypted: true,
+        key: process.env.VUE_APP_PUSHER_APP_KEY,
+        authorizer: channel => {
+          return {
+            authorize: (socketId, callback) => {
+              axios
+                .post(
+                  `${process.env.VUE_APP_BASE_URL}/broadcasting/auth`,
+                  {
+                    socket_id: socketId,
+                    channel_name: channel.name
+                  },
+                  {
+                    headers: {
+                      Authorization: `Bearer ${getToken()}`
+                    }
+                  }
+                )
+                .then(response => {
+                  console.log(response.data);
+                  callback(false, response.data);
+                })
+                .catch(error => {
+                  callback(true, error);
+                });
+            }
+          };
+        }
+      });
+      this.onlineChannel = window.Echo.join("wossop-channel");
     }
   },
 
@@ -98,6 +152,7 @@ export default {
     if (!isUser) this.fetchUserData();
 
     this.fetchAllUsersData();
+    this.initializeChannel();
   }
 };
 </script>

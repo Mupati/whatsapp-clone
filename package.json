@@ -13,8 +13,11 @@
     "@quasar/extras": "^1.0.0",
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "laravel-echo": "^1.10.0",
+    "pusher-js": "^7.0.2",
     "quasar": "^1.0.0",
     "register-service-worker": "^1.7.1",
+    "simple-peer": "^9.9.3",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"
