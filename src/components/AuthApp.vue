@@ -133,7 +133,6 @@ export default {
                   }
                 )
                 .then(response => {
-                  console.log(response.data);
                   callback(false, response.data);
                 })
                 .catch(error => {
