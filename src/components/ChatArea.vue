@@ -12,9 +12,9 @@
           <q-item-label class="text-subtitle1" style="color: #fff">{{
             userInfo.name
           }}</q-item-label>
-          <q-item-label caption class="text-primary"
-            >Last seen today at 10:18PM</q-item-label
-          >
+          <q-item-label caption class="text-primary">{{
+            onlineStatus
+          }}</q-item-label>
         </q-item-section>
       </q-item>
       <q-space />
@@ -146,7 +146,7 @@
 
 <script>
 export default {
-  props: ["userInfo"],
+  props: ["userInfo", "onlineStatus"],
   data() {
     return {
       message: null,

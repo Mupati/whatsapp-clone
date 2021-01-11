@@ -19,6 +19,7 @@
         v-if="isUserSelected"
         @handleRightNavigation="handleRightNavigation"
         :userInfo="selectedUserInfo"
+        :onlineStatus="selectedUserOnlineStatus"
       />
       <NoSelectedMessage v-else />
     </div>
@@ -28,6 +29,7 @@
         v-if="rightComponent === 'user-profile'"
         @hideRightSection="isVisibleRight = false"
         :userInfo="selectedUserInfo"
+        :onlineStatus="selectedUserOnlineStatus"
       />
     </div>
   </section>
@@ -37,7 +39,9 @@
 // import Peer from "simple-peer";
 import Echo from "laravel-echo";
 import axios from "axios";
+import { formatRelative } from "date-fns";
 import { getUser, getUsers, getToken } from "../api";
+
 window.Pusher = require("pusher-js");
 
 export default {
@@ -60,10 +64,25 @@ export default {
       selectedUserInfo: null,
       user: this.authUser,
       allUsers: null,
-      onlineChannel: null
+      onlineChannel: null,
+      onlineUsers: []
     };
   },
 
+  computed: {
+    selectedUserOnlineStatus() {
+      const userIndex = this.onlineUsers.findIndex(
+        user => user.id === this.selectedUserInfo.id
+      );
+      console.log(this.onlineUsers);
+      if (userIndex < 0) {
+        // return formatRelative(this.selectedUserInfo.last_login_at, new Date());
+        console.log(this.selectedUserInfo);
+        return "Offline";
+      }
+      return "Online";
+    }
+  },
   methods: {
     async fetchUserData() {
       try {
@@ -76,7 +95,6 @@ export default {
     fetchAllUsersData() {
       return getUsers()
         .then(res => {
-          console.log("AuthApp.vue fetch all users");
           this.allUsers = res.data;
         })
         .catch(err => {
@@ -99,18 +117,6 @@ export default {
     },
 
     initializeChannel() {
-      // window.Echo = new Echo({
-      //   broadcaster: "pusher",
-      //   key: process.env.VUE_APP_PUSHER_APP_KEY,
-      //   authEndpoint: `${process.env.VUE_APP_BASE_URL}/broadcasting/auth`,
-      //   cluster: "mt1",
-      //   auth: {
-      // headers: {
-      //   Authorization: `Bearer ${getToken()}`,
-      // },
-      //   },
-      // });
-
       window.Echo = new Echo({
         broadcaster: "pusher",
         cluster: process.env.VUE_APP_PUSHER_CLUSTER,
@@ -143,6 +149,33 @@ export default {
         }
       });
       this.onlineChannel = window.Echo.join("wossop-channel");
+    },
+
+    initializeChannelListeners() {
+      // all users that are already on the channel
+      // at the time the current user logged in.
+      this.onlineChannel.here(users => {
+        this.onlineUsers = users;
+      });
+
+      // when a user is joining
+      this.onlineChannel.joining(user => {
+        // check whether incoming user already joined
+        const userIndex = this.onlineUsers.findIndex(
+          data => data.id === user.id
+        );
+        // add to the onlineUsers array if not available
+        if (userIndex < 0) this.onlineUsers.push(user);
+      });
+
+      // when user is leaving
+      this.onlineChannel.leaving(user => {
+        const userIndex = this.onlineUsers.findIndex(
+          data => data.id === user.id
+        );
+        // remove the leaving user from the onlineUsers array
+        this.onlineUsers.splice(userIndex, 1);
+      });
     }
   },
 
@@ -152,6 +185,12 @@ export default {
 
     this.fetchAllUsersData();
     this.initializeChannel();
+    this.initializeChannelListeners();
+  },
+
+  beforeDestroy() {
+    console.log(formatRelative);
+    console.log("destroyed");
   }
 };
 </script>
