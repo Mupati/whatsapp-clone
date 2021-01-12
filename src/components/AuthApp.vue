@@ -39,7 +39,7 @@
 // import Peer from "simple-peer";
 import Echo from "laravel-echo";
 import axios from "axios";
-import { formatRelative } from "date-fns";
+import { formatRelative, parseISO } from "date-fns";
 import { getUser, getUsers, getToken } from "../api";
 
 window.Pusher = require("pusher-js");
@@ -74,10 +74,15 @@ export default {
       const userIndex = this.onlineUsers.findIndex(
         user => user.id === this.selectedUserInfo.id
       );
-      console.log(this.onlineUsers);
       if (userIndex < 0) {
-        // return formatRelative(this.selectedUserInfo.last_login_at, new Date());
-        console.log(this.selectedUserInfo);
+        // check whether they've recorded their last login before you parse it
+        let last_online = Boolean(this.selectedUserInfo.last_login_at);
+        if (last_online) {
+          return `last seen ${formatRelative(
+            parseISO(this.selectedUserInfo.last_login_at),
+            new Date()
+          )}`;
+        }
         return "Offline";
       }
       return "Online";
@@ -169,13 +174,36 @@ export default {
       });
 
       // when user is leaving
-      this.onlineChannel.leaving(user => {
+      this.onlineChannel.leaving(async user => {
         const userIndex = this.onlineUsers.findIndex(
           data => data.id === user.id
         );
         // remove the leaving user from the onlineUsers array
         this.onlineUsers.splice(userIndex, 1);
+
+        await this.$nextTick();
+        // let updatedOnlineUsers = this.onlineUsers.splice(userIndex, 1);
+        // this.onlineUsers = updatedOnlineUsers;
+        // console.log("Leaving Second", updatedOnlineUsers);
       });
+
+      // Update online status of user who logs out
+      // you do this by updating the user's value in the
+      this.onlineChannel.listen("UpdateLoginTime", ({ data }) => {
+        // update the leaving user's last_login_at in the allUsers object.
+        const leavingUserIndex = this.allUsers.findIndex(
+          singleUser => singleUser.id === data.id
+        );
+        if (this.allUsers[leavingUserIndex]) {
+          this.allUsers[leavingUserIndex].last_login_at = data.last_login_at;
+        }
+      });
+    },
+
+    disconnectChannel() {
+      this.onlineChannel.pusher.channels.channels[
+        "presence-wossop-channel"
+      ].disconnect();
     }
   },
 
@@ -189,8 +217,7 @@ export default {
   },
 
   beforeDestroy() {
-    console.log(formatRelative);
-    console.log("destroyed");
+    this.disconnectChannel();
   }
 };
 </script>

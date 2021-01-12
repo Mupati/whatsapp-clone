@@ -128,24 +128,14 @@ export default {
     },
 
     async logoutUser() {
-      await doLogout();
-      this.$root.$emit("logoutUser");
+      try {
+        await doLogout();
+        this.$root.$emit("logoutUser");
+      } catch (error) {
+        console.log(error);
+      }
     }
-
-    // async fetchAllUsers() {
-    //   try {
-    //     const response = await getUsers();
-    //     console.log("chat list fetch all users");
-    //     this.allUsers = response.data;
-    //   } catch (error) {
-    //     console.log(error);
-    //   }
-    // }
   }
-  // mounted() {
-  //   let allUsersAvailable = Boolean(this.users);
-  //   if (!allUsersAvailable) this.fetchAllUsers();
-  // }
 };
 </script>
 <style lang="scss" scoped>

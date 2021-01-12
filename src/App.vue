@@ -17,7 +17,7 @@
 import AuthApp from "./components/AuthApp";
 import NonAuthApp from "./components/NonAuthApp";
 
-import { getToken } from "./api";
+import { getToken, clearToken } from "./api";
 export default {
   name: "MainApp",
   components: {
@@ -34,9 +34,12 @@ export default {
   methods: {},
 
   mounted() {
-    document.title = "Wossop - Kofi Mupati";
+    document.title = "Wossop";
     this.$root.$on("logoutUser", () => {
       this.isLoggedIn = false;
+      clearToken();
+      // reload to update login status - hack
+      location.reload();
     });
 
     this.$root.$on("loginUser", user => {
@@ -46,7 +49,6 @@ export default {
   },
 
   beforeDestroy() {
-    console.log("before destroy hook");
     this.$root.$off("loginUser");
     this.$root.$off("logoutUser");
   }

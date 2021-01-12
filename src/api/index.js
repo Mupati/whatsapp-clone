@@ -16,22 +16,16 @@ export const doLogin = async data => {
   return Api.post("/login", data);
 };
 
-export const doLogout = async () => {
-  try {
-    await Api.post(
-      "/logout",
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
+export const doLogout = async () =>
+  Api.post(
+    "/logout",
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
       }
-    );
-    clearToken();
-  } catch (error) {
-    console.log(error);
-  }
-};
+    }
+  );
 
 export const getUser = () =>
   Api.get("/user", {
