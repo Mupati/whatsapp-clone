@@ -39,7 +39,6 @@ This is a list of features to be implemented
 
 ### Todo
 
-- [ ] Messaging Feature
 - [ ] One-on-one Video Chat
 - [ ] Group Video Chat
 - [ ] Group Creation Feature
@@ -54,3 +53,4 @@ This is a list of features to be implemented
 ### Done ✓
 
 - [x] Initial UI design
+- [x] Messaging Feature
