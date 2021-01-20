@@ -20,6 +20,9 @@
         @handleRightNavigation="handleRightNavigation"
         :userInfo="selectedUserInfo"
         :onlineStatus="selectedUserOnlineStatus"
+        :allMessages="allMessages"
+        :messagingChannel="onlineChannel"
+        :authUserId="user.id"
       />
       <NoSelectedMessage v-else />
     </div>
@@ -40,7 +43,7 @@
 import Echo from "laravel-echo";
 import axios from "axios";
 import { formatRelative, parseISO } from "date-fns";
-import { getUser, getUsers, getToken } from "../api";
+import { getUser, getUsers, getToken, Api } from "../api";
 
 window.Pusher = require("pusher-js");
 
@@ -65,7 +68,8 @@ export default {
       user: this.authUser,
       allUsers: null,
       onlineChannel: null,
-      onlineUsers: []
+      onlineUsers: [],
+      allMessages: []
     };
   },
 
@@ -119,6 +123,21 @@ export default {
     handleSelectUser(userInfo) {
       this.isUserSelected = true;
       this.selectedUserInfo = userInfo;
+      this.fetchMessages(userInfo.id);
+    },
+
+    async fetchMessages(id) {
+      Api.get(`/message/${id}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      })
+        .then(res => {
+          this.allMessages = res.data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
     },
 
     initializeChannel() {

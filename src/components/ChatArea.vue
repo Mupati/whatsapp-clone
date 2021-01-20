@@ -72,9 +72,18 @@
         class="messaging-area__chat q-px-xl q-py-md"
         ref="chatScroll"
       >
-        <div v-for="i in 20" :key="i">
-          <q-chat-message :text="['hey, how are you?']" sent />
-          <q-chat-message :text="['doing fine, how r you?']" />
+        <div v-for="message in messages" :key="message.id">
+          <q-chat-message
+            :text="[`${message.message}`]"
+            :stamp="messageTime(message.created_at)"
+            sent
+            v-if="message.sender === authUserId"
+          />
+          <q-chat-message
+            :text="[`${message.message}`]"
+            :stamp="messageTime(message.created_at)"
+            v-else
+          />
         </div>
       </q-scroll-area>
     </div>
@@ -90,7 +99,7 @@
           color: '#f1f1f2'
         }"
         bg-color="dark"
-        v-model="message"
+        v-model="new_message"
       >
         <template v-slot:before>
           <q-btn
@@ -134,8 +143,9 @@
             round
             dense
             icon="send"
-            v-if="message"
+            v-if="new_message"
             style="color: #b1b3b5"
+            @click="sendMessage"
           />
           <q-btn flat round dense icon="mic" v-else style="color: #b1b3b5" />
         </template>
@@ -145,16 +155,34 @@
 </template>
 
 <script>
+import { format, parseISO } from "date-fns";
+import { Api, getToken } from "../api";
 export default {
-  props: ["userInfo", "onlineStatus"],
+  props: [
+    "userInfo",
+    "onlineStatus",
+    "allMessages",
+    "messagingChannel",
+    "authUserId"
+  ],
   data() {
     return {
-      message: null,
+      new_message: null,
       isShowingChatMenu: false
+      // messages: this.allMessages
     };
+  },
+  computed: {
+    messages() {
+      return this.allMessages;
+    }
   },
 
   methods: {
+    messageTime(datetime) {
+      return format(parseISO(datetime), "H:mm a");
+    },
+
     scrollToChatBottom() {
       const scrollArea = this.$refs.chatScroll;
       const scrollTarget = scrollArea.getScrollTarget();
@@ -163,11 +191,60 @@ export default {
     },
     selectMenu(itemName) {
       this.$emit("handleRightNavigation", itemName);
+    },
+
+    async sendMessage() {
+      Api.post(
+        "/message",
+        { receiver_id: this.userInfo.id, message: this.new_message },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
+      )
+        .then(() => {
+          this.new_message = null;
+          this.scrollToChatBottom();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
+    async fetchMessages() {
+      Api.get(`/message/${this.userInfo.id}`, {
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
+      })
+        .then(res => {
+          console.log(res);
+          this.scrollToChatBottom();
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
+    listenForNewMessages() {
+      // Listen to incoming Wossop Messages
+      this.messagingChannel.listen("SendWossopMessage", ({ message }) => {
+        if (
+          (message.sender === this.authUserId &&
+            message.receiver === this.userInfo.id) ||
+          (message.receiver === this.authUserId &&
+            message.sender === this.userInfo.id)
+        ) {
+          this.messages.push(message);
+        }
+      });
     }
   },
 
   mounted() {
     this.scrollToChatBottom();
+    this.listenForNewMessages();
   }
 };
 </script>
@@ -190,7 +267,7 @@ export default {
   flex-grow: 60;
   background-color: #131c21;
   background-image: url("../assets/chat-area-bg.png");
-  //   mix-blend-mode: multiply;
+  // mix-blend-mode: multiply;
 
   &__chat {
     isolation: isolate;

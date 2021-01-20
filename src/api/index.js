@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const Api = axios.create({
+export const Api = axios.create({
   baseURL: process.env.VUE_APP_BASE_URL
 });
 
@@ -8,15 +8,15 @@ Api.defaults.withCredentials = true;
 
 const tokenName = process.env.VUE_APP_TOKEN_NAME;
 
-export const doRegister = async data => {
+export const doRegister = data => {
   return Api.post("/register", data);
 };
 
-export const doLogin = async data => {
+export const doLogin = data => {
   return Api.post("/login", data);
 };
 
-export const doLogout = async () =>
+export const doLogout = () =>
   Api.post(
     "/logout",
     {},
@@ -50,3 +50,5 @@ export const clearToken = () => {
 };
 
 export const getToken = () => localStorage.getItem(tokenName);
+
+//
