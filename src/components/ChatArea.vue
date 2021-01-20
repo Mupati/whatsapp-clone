@@ -155,8 +155,8 @@
 </template>
 
 <script>
-import { format, parseISO } from "date-fns";
 import { Api, getToken } from "../api";
+import { getMessageTime } from "../api/utils";
 export default {
   props: [
     "userInfo",
@@ -180,7 +180,7 @@ export default {
 
   methods: {
     messageTime(datetime) {
-      return format(parseISO(datetime), "H:mm a");
+      return getMessageTime(datetime);
     },
 
     scrollToChatBottom() {

@@ -87,12 +87,16 @@
           <q-item-section>
             <q-item-label class="text-white">{{ contact.name }}</q-item-label>
             <q-item-label class="text-grey" caption lines="1">{{
-              contact.email
+              contact.latest_message.length > 0
+                ? contact.latest_message[0].message
+                : contact.email
             }}</q-item-label>
           </q-item-section>
 
-          <q-item-section side>
-            <q-item-label>10:51am</q-item-label>
+          <q-item-section side v-if="contact.latest_message.length > 0">
+            <q-item-label>{{
+              messageTime(contact.latest_message[0].created_at)
+            }}</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -102,6 +106,7 @@
 
 <script>
 import { doLogout } from "../api";
+import { getMessageTime } from "../api/utils";
 
 export default {
   name: "ChatList",
@@ -126,7 +131,9 @@ export default {
       let selectedUserInfo = this.allUsers.filter(user => user.id === userId);
       this.$emit("selectUser", selectedUserInfo[0]);
     },
-
+    messageTime(datetime) {
+      return getMessageTime(datetime);
+    },
     async logoutUser() {
       try {
         await doLogout();
