@@ -78,13 +78,16 @@
             :stamp="messageTime(message.created_at)"
             sent
             v-if="message.sender === authUserId"
-          />
+          >
+          </q-chat-message>
+
           <q-chat-message
             :text="[`${message.message}`]"
             :stamp="messageTime(message.created_at)"
-            v-else
-          />
+            v-if="message.receiver === authUserId"
+          ></q-chat-message>
         </div>
+        <q-spinner-dots size="2rem" color="positive" v-if="userInfo.isTyping" />
       </q-scroll-area>
     </div>
     <div class="messaging-input q-px-md q-pt-sm">
@@ -101,6 +104,7 @@
         bg-color="dark"
         v-model="new_message"
         @keyup="userTyping"
+        @keyup.enter="sendMessage"
       >
         <template v-slot:before>
           <q-btn
@@ -238,6 +242,12 @@ export default {
   mounted() {
     this.scrollToChatBottom();
     this.listenForNewMessages();
+  },
+
+  updated() {
+    // when a new user is selected from the chat list
+    // scroll to the bottom
+    this.scrollToChatBottom();
   }
 };
 </script>

@@ -7,14 +7,13 @@
         :authUser="user"
       />
       <ChatList
-        v-if="leftComponent === 'chat-list' && allUsers"
-        :users="allUsers"
+        v-if="leftComponent === 'chat-list' && contactedUsers"
+        :users="contactedUsers"
         @handleLeftNavigation="handleLeftNavigation"
         @selectUser="handleSelectUser"
       />
       <NewChatList
-        v-if="leftComponent === 'new-chat-list' && allUsers"
-        :users="allUsers"
+        v-if="leftComponent === 'new-chat-list' && contactedUsers"
         @handleLeftNavigation="leftComponent = 'chat-list'"
         @selectUser="handleSelectUser"
       />
@@ -49,7 +48,7 @@
 import Echo from "laravel-echo";
 import axios from "axios";
 import { formatRelative, parseISO } from "date-fns";
-import { getUser, getUsers, getToken, Api } from "../api";
+import { getUser, getContactedUsers, getToken, Api } from "../api";
 
 window.Pusher = require("pusher-js");
 
@@ -73,7 +72,7 @@ export default {
       isUserSelected: false,
       selectedUserInfo: {},
       user: this.authUser,
-      allUsers: null,
+      contactedUsers: null,
       onlineChannel: null,
       onlineUsers: [],
       allMessages: [],
@@ -110,10 +109,10 @@ export default {
       }
     },
 
-    fetchAllUsersData() {
-      return getUsers()
+    fetchContactedUsers() {
+      return getContactedUsers()
         .then(res => {
-          this.allUsers = res.data;
+          this.contactedUsers = res.data;
         })
         .catch(err => {
           console.log(err);
@@ -218,27 +217,46 @@ export default {
       // Update online status of user who logs out
       // you do this by updating the user's value in the
       this.onlineChannel.listen("UpdateLoginTime", ({ data }) => {
-        // update the leaving user's last_login_at in the allUsers object.
-        const leavingUserIndex = this.allUsers.findIndex(
+        // update the leaving user's last_login_at in the contactedUsers object.
+        const leavingUserIndex = this.contactedUsers.findIndex(
           singleUser => singleUser.id === data.id
         );
-        if (this.allUsers[leavingUserIndex]) {
-          this.allUsers[leavingUserIndex].last_login_at = data.last_login_at;
+        if (this.contactedUsers[leavingUserIndex]) {
+          this.contactedUsers[leavingUserIndex].last_login_at =
+            data.last_login_at;
         }
       });
 
       // Listen for  a typing event
       this.onlineChannel.listenForWhisper("typing", e => {
         if (e.receiver === this.user.id) {
-          let typingUserIndex = this.allUsers.findIndex(
+          let typingUserIndex = this.contactedUsers.findIndex(
             singleUser => singleUser.id === e.sender
           );
-          this.$set(this.allUsers[typingUserIndex], "isTyping", true);
+          this.$set(this.contactedUsers[typingUserIndex], "isTyping", true);
 
           // reset timer
           setTimeout(() => {
-            this.$set(this.allUsers[typingUserIndex], "isTyping", false);
+            this.$set(this.contactedUsers[typingUserIndex], "isTyping", false);
           }, 2000);
+        }
+      });
+
+      // I don't know how best to go about this, to have an optimized solution
+      // There are a lot of API calls which must be changed later.
+      // What I want to do is update the contacted Users in the ChatList so that
+      // the lastest messages come to the top.
+
+      // When the authenticated user sends or receives a message, fetchContactedUsers
+      this.onlineChannel.listen("SendWossopMessage", async ({ message }) => {
+        if (
+          message.sender === this.user.id ||
+          message.receiver === this.user.id
+        ) {
+          console.log("contactedUsers", this.contactedUsers);
+          const res = await getContactedUsers();
+          this.contactedUsers = res.data;
+          console.log("updatedContactedUsers", this.contactedUsers);
         }
       });
     },
@@ -254,7 +272,7 @@ export default {
     let isUser = Boolean(this.user);
     if (!isUser) this.fetchUserData();
 
-    this.fetchAllUsersData();
+    this.fetchContactedUsers();
     this.initializeChannel();
     this.initializeChannelListeners();
   },

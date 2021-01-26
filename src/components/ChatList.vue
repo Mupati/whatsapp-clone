@@ -79,7 +79,7 @@
     <q-scroll-area style="height: calc(100% - 122.2656px)">
       <q-list bordered separator>
         <q-item
-          v-for="contact in allUsers"
+          v-for="contact in allContactedUsers"
           :key="contact.id"
           class="q-my-sm"
           clickable
@@ -102,16 +102,17 @@
               >typing...</q-item-label
             >
             <q-item-label class="text-grey" caption lines="1" v-else>{{
-              contact.latest_message.length > 0
-                ? contact.latest_message[0].message
-                : contact.email
+              contact.message ? contact.message : contact.email
             }}</q-item-label>
           </q-item-section>
 
-          <q-item-section side v-if="contact.latest_message.length > 0">
-            <q-item-label>{{
-              messageTime(contact.latest_message[0].created_at)
-            }}</q-item-label>
+          <q-item-section side v-if="contact.created_at">
+            <q-item-label>{{ messageTime(contact.created_at) }}</q-item-label>
+            <q-badge
+              color="teal"
+              :label="contact.unread_count"
+              v-if="contact.unread_count > 0"
+            />
           </q-item-section>
         </q-item>
       </q-list>
@@ -129,7 +130,7 @@ export default {
   data() {
     return {
       isLoading: false,
-      allUsers: this.users
+      allContactedUsers: this.users
     };
   },
 
@@ -152,7 +153,9 @@ export default {
     },
 
     selectUser(userId) {
-      let selectedUserInfo = this.allUsers.filter(user => user.id === userId);
+      let selectedUserInfo = this.allContactedUsers.filter(
+        user => user.id === userId
+      );
       this.$emit("selectUser", selectedUserInfo[0]);
     },
     messageTime(datetime) {

@@ -41,6 +41,13 @@ export const getUsers = () =>
     }
   });
 
+export const getContactedUsers = () =>
+  Api.get("/contacted-users", {
+    headers: {
+      Authorization: `Bearer ${getToken()}`
+    }
+  });
+
 export const storeToken = token => {
   localStorage.setItem(tokenName, token);
 };

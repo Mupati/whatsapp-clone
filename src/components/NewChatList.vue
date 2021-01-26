@@ -82,13 +82,14 @@
 </template>
 
 <script>
+import { getUsers } from "../api";
 export default {
   name: "NewChatList",
-  props: ["users"],
+  // props: ["users"],
   data() {
     return {
       isLoading: false,
-      allUsers: this.users
+      allUsers: null
     };
   },
 
@@ -106,9 +107,24 @@ export default {
     },
 
     selectUser(userId) {
-      let selectedUserInfo = this.allUsers.filter(user => user.id === userId);
+      let selectedUserInfo =
+        this.allUsers && this.allUsers.filter(user => user.id === userId);
       this.$emit("selectUser", selectedUserInfo[0]);
+    },
+
+    fetchAllUsers() {
+      return getUsers()
+        .then(res => {
+          this.allUsers = res.data;
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
+  },
+
+  mounted() {
+    this.fetchAllUsers();
   }
 };
 </script>
