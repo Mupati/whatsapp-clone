@@ -7,7 +7,13 @@
       <q-space />
       <q-btn flat round dense icon="donut_large" />
       <div class="q-ml-sm"></div>
-      <q-btn flat round dense icon="chat" />
+      <q-btn
+        flat
+        round
+        dense
+        icon="chat"
+        @click="selectMenu('new-chat-list')"
+      />
       <div class="q-mr-sm"></div>
       <q-btn flat round dense icon="more_vert">
         <q-menu
@@ -81,12 +87,21 @@
           @click="selectUser(contact.id)"
         >
           <q-item-section avatar>
-            <q-avatar color="primary" text-color="white"> K </q-avatar>
+            <q-avatar color="primary" text-color="white" size="48px">
+              {{ contact.name | userAvatar }}
+            </q-avatar>
           </q-item-section>
 
           <q-item-section>
             <q-item-label class="text-white">{{ contact.name }}</q-item-label>
-            <q-item-label class="text-grey" caption lines="1">{{
+            <q-item-label
+              class="text-grey"
+              caption
+              lines="1"
+              v-if="contact.isTyping"
+              >typing...</q-item-label
+            >
+            <q-item-label class="text-grey" caption lines="1" v-else>{{
               contact.latest_message.length > 0
                 ? contact.latest_message[0].message
                 : contact.email
@@ -116,6 +131,15 @@ export default {
       isLoading: false,
       allUsers: this.users
     };
+  },
+
+  filters: {
+    userAvatar(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+    }
   },
 
   methods: {

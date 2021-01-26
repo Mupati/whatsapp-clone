@@ -13,7 +13,7 @@
             userInfo.name
           }}</q-item-label>
           <q-item-label caption class="text-primary">{{
-            onlineStatus
+            userInfo.isTyping ? "typing..." : onlineStatus
           }}</q-item-label>
         </q-item-section>
       </q-item>
@@ -100,6 +100,7 @@
         }"
         bg-color="dark"
         v-model="new_message"
+        @keyup="userTyping"
       >
         <template v-slot:before>
           <q-btn
@@ -169,7 +170,6 @@ export default {
     return {
       new_message: null,
       isShowingChatMenu: false
-      // messages: this.allMessages
     };
   },
   computed: {
@@ -196,7 +196,7 @@ export default {
     async sendMessage() {
       Api.post(
         "/message",
-        { receiver_id: this.userInfo.id, message: this.new_message },
+        { receiver_id: this.userInfo.id, message: this.new_message.trim() },
         {
           headers: {
             Authorization: `Bearer ${getToken()}`
@@ -212,19 +212,12 @@ export default {
         });
     },
 
-    async fetchMessages() {
-      Api.get(`/message/${this.userInfo.id}`, {
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
-      })
-        .then(res => {
-          console.log(res);
-          this.scrollToChatBottom();
-        })
-        .catch(err => {
-          console.log(err);
-        });
+    userTyping() {
+      this.messagingChannel.whisper("typing", {
+        message: this.new_message.trim(),
+        sender: this.authUserId,
+        receiver: this.userInfo.id
+      });
     },
 
     listenForNewMessages() {

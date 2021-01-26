@@ -3,13 +3,19 @@
     <div class="col-3 main__left">
       <AuthUserProfile
         v-if="leftComponent === 'profile'"
-        @showChatList="leftComponent = 'chat-list'"
+        @handleLeftNavigation="leftComponent = 'chat-list'"
         :authUser="user"
       />
       <ChatList
         v-if="leftComponent === 'chat-list' && allUsers"
         :users="allUsers"
         @handleLeftNavigation="handleLeftNavigation"
+        @selectUser="handleSelectUser"
+      />
+      <NewChatList
+        v-if="leftComponent === 'new-chat-list' && allUsers"
+        :users="allUsers"
+        @handleLeftNavigation="leftComponent = 'chat-list'"
         @selectUser="handleSelectUser"
       />
     </div>
@@ -53,6 +59,7 @@ export default {
   components: {
     NoSelectedMessage: () => import("./NoSelectedMessage.vue"),
     ChatList: () => import("./ChatList.vue"),
+    NewChatList: () => import("./NewChatList.vue"),
     ChatArea: () => import("./ChatArea.vue"),
     SelectedUserProfile: () => import("./SelectedUserProfile"),
     AuthUserProfile: () => import("./AuthUserProfile")
@@ -64,12 +71,13 @@ export default {
       rightComponent: "user-profile",
       isVisibleRight: false,
       isUserSelected: false,
-      selectedUserInfo: null,
+      selectedUserInfo: {},
       user: this.authUser,
       allUsers: null,
       onlineChannel: null,
       onlineUsers: [],
-      allMessages: []
+      allMessages: [],
+      userTyping: false
     };
   },
 
@@ -101,6 +109,7 @@ export default {
         console.log(error);
       }
     },
+
     fetchAllUsersData() {
       return getUsers()
         .then(res => {
@@ -215,6 +224,21 @@ export default {
         );
         if (this.allUsers[leavingUserIndex]) {
           this.allUsers[leavingUserIndex].last_login_at = data.last_login_at;
+        }
+      });
+
+      // Listen for  a typing event
+      this.onlineChannel.listenForWhisper("typing", e => {
+        if (e.receiver === this.user.id) {
+          let typingUserIndex = this.allUsers.findIndex(
+            singleUser => singleUser.id === e.sender
+          );
+          this.$set(this.allUsers[typingUserIndex], "isTyping", true);
+
+          // reset timer
+          setTimeout(() => {
+            this.$set(this.allUsers[typingUserIndex], "isTyping", false);
+          }, 2000);
         }
       });
     },

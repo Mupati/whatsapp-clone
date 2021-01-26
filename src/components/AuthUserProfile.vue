@@ -3,7 +3,7 @@
     <div class="profile-toolbar">
       <q-toolbar></q-toolbar>
       <q-toolbar class="profile-toolbar">
-        <q-btn flat round dense icon="arrow_back" @click="showChatList" />
+        <q-btn flat round dense icon="arrow_back" @click="navigateBack" />
         <q-toolbar-title>Profile</q-toolbar-title>
       </q-toolbar>
     </div>
@@ -51,8 +51,8 @@ export default {
   },
 
   methods: {
-    showChatList() {
-      this.$emit("showChatList");
+    navigateBack() {
+      this.$emit("handleLeftNavigation");
     }
   }
 };

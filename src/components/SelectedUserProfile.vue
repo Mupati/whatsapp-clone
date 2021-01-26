@@ -17,7 +17,9 @@
           class="block q-mx-auto q-mt-md"
         />
         <div class="text-h6">{{ userInfo.name }}</div>
-        <div class="text-subtitle2">{{ onlineStatus }}</div>
+        <div class="text-subtitle2">
+          {{ userInfo.isTyping ? "typing..." : onlineStatus }}
+        </div>
       </q-card-section>
     </q-card>
 
