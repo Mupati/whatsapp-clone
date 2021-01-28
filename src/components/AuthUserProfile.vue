@@ -10,15 +10,88 @@
 
     <!-- Your Name -->
     <q-card flat bordered class="card-bg">
-      <q-card-section class="q-pt-none q-mx-auto">
-        <img
-          src="../assets/default_avatar.png"
-          alt="display picture"
-          height="200"
-          width="200"
-          style="border-radius: 50%"
-          class="block q-mx-auto q-mt-md q-mb-xl"
-        />
+      <q-card-section class="q-pt-none">
+        <div class="dp-container relative-position q-mt-md q-mb-xl q-mx-auto">
+          <q-avatar style="width: 200px; height: 200px">
+            <img
+              :src="authUser.avatar_url"
+              alt="user-dp"
+              height="200"
+              width="200"
+              style="border-radius: 50%"
+              class="block cursor-pointer user-dp"
+              v-if="authUser.avatar_url"
+            />
+            <img
+              src="../assets/default_avatar.png"
+              alt="user-dp"
+              height="200"
+              width="200"
+              style="border-radius: 50%"
+              class="block cursor-pointer user-dp"
+              v-else
+            />
+            <q-file
+              v-model="newDp"
+              label="Standard"
+              style="display: none"
+              ref="uploadDialog"
+              @input="uploadPhoto"
+            />
+          </q-avatar>
+          <div
+            class="column justify-center items-center absolute dp-change text-center cursor-pointer"
+            :class="{ 'show-opacity': isActiveChangeDp }"
+          >
+            <q-menu
+              anchor="center right"
+              self="top middle"
+              @before-show="isActiveChangeDp = true"
+              @before-hide="isActiveChangeDp = false"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-close-popup
+                  class="q-pl-lg"
+                  @click="viewPhoto"
+                >
+                  <q-item-section>View photo</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  class="q-pl-lg"
+                  @click="takePhoto"
+                >
+                  <q-item-section>Take photo</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  class="q-pl-lg"
+                  @click="showUploadDialog"
+                >
+                  <q-item-section>Upload photo</q-item-section>
+                </q-item>
+                <q-item
+                  clickable
+                  v-close-popup
+                  class="q-pl-lg"
+                  @click="removePhoto"
+                >
+                  <q-item-section>Remove photo</q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+            <q-btn flat round dense icon="photo_camera" class="q-mb-sm"></q-btn>
+            <div>
+              CHANGE<br />
+              PROFILE<br />
+              PHOTO
+            </div>
+          </div>
+        </div>
         <div class="text-subtitle2">Your Name</div>
         <div class="text-subtitle1">{{ authUser.name }}</div>
       </q-card-section>
@@ -31,9 +104,9 @@
         WhatsApp contacts.
       </q-card-section>
       <q-card-section>
-        <div class="text-subtitle2">Your Name</div>
+        <div class="text-subtitle2">About</div>
         <div class="text-subtitle1">
-          My Confidence is in the Mercy of God. 01.01.21
+          {{ authUser.about || "Hi, there I use Wossop" }}
         </div>
       </q-card-section>
     </q-card>
@@ -41,18 +114,58 @@
 </template>
 
 <script>
+import { Api, getToken } from "../api";
 export default {
   name: "AuthUserProfile",
   props: ["authUser"],
   data() {
     return {
-      isMutedNotification: false
+      isMutedNotification: false,
+      isActiveChangeDp: false,
+      newDp: null
     };
   },
 
   methods: {
     navigateBack() {
       this.$emit("handleLeftNavigation");
+    },
+
+    viewPhoto() {
+      console.log("view photo");
+    },
+
+    takePhoto() {
+      console.log("take photo");
+    },
+
+    showUploadDialog() {
+      this.$refs.uploadDialog.pickFiles();
+    },
+
+    uploadPhoto() {
+      const fd = new FormData();
+
+      fd.append("id", this.authUser.id);
+      fd.append("image", this.newDp);
+
+      Api.post("/update-dp", fd, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${getToken()}`
+        }
+      })
+        .then(res => {
+          console.log(res);
+          // emit event to fetch user data again on the AuthApp
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
+    removePhoto() {
+      console.log("upload photo");
     }
   }
 };
@@ -70,5 +183,34 @@ export default {
 }
 .card-bg {
   background-color: #131c21;
+}
+
+.dp-container {
+  height: 200px;
+  width: 200px;
+}
+
+.user-dp {
+  opacity: 1;
+  &:hover {
+    opacity: 0.3;
+    backface-visibility: hidden;
+  }
+}
+.dp-change {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  background-color: #232b2fcc;
+  color: #fff;
+  opacity: 0;
+  &:hover {
+    opacity: 1;
+  }
+}
+.show-opacity {
+  opacity: 1;
 }
 </style>

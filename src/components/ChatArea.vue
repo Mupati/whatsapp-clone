@@ -5,7 +5,12 @@
       @click="selectMenu('user-profile')"
     >
       <q-avatar class="q-ml-sm cursor-pointer">
-        <img src="../assets/default_avatar.png" />
+        <img
+          :src="userInfo.avatar_url"
+          alt="user-dp"
+          v-if="userInfo.avatar_url"
+        />
+        <img src="../assets/default_avatar.png" alt="user-dp" v-else />
       </q-avatar>
       <q-item>
         <q-item-section>

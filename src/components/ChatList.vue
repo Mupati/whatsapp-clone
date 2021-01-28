@@ -2,7 +2,12 @@
   <section id="wrapper">
     <q-toolbar class="list-toolbar" style="height: 64.2812px">
       <q-avatar class="q-ml-sm cursor-pointer" @click="selectMenu('profile')">
-        <img src="../assets/default_avatar.png" />
+        <img
+          :src="authUser.avatar_url"
+          alt="user-dp"
+          v-if="authUser.avatar_url"
+        />
+        <img src="../assets/default_avatar.png" alt="user-dp" v-else />
       </q-avatar>
       <q-space />
       <q-btn flat round dense icon="donut_large" />
@@ -88,7 +93,12 @@
         >
           <q-item-section avatar>
             <q-avatar color="primary" text-color="white" size="48px">
-              {{ contact.name | userAvatar }}
+              <img
+                :src="getUserDp(contact.avatar_path)"
+                alt="user-dp"
+                v-if="getUserDp(contact.avatar_path)"
+              />
+              <span v-else> {{ contact.name | userAvatar }}</span>
             </q-avatar>
           </q-item-section>
 
@@ -126,7 +136,7 @@ import { getMessageTime } from "../api/utils";
 
 export default {
   name: "ChatList",
-  props: ["users"],
+  props: ["authUser", "users"],
   data() {
     return {
       isLoading: false,
@@ -144,6 +154,12 @@ export default {
   },
 
   methods: {
+    getUserDp(avatar_path) {
+      if (avatar_path) {
+        return `https://${process.env.VUE_APP_AWS_BUCKET}.s3.amazonaws.com/${avatar_path}`;
+      }
+      return avatar_path;
+    },
     doSearch() {
       this.isLoading = true;
     },

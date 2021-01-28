@@ -9,13 +9,24 @@
     <q-card flat bordered class="card-bg">
       <q-card-section class="q-pt-none q-mx-auto">
         <img
+          :src="userInfo.avatar_url"
+          alt="user-dp"
+          height="200"
+          width="200"
+          style="border-radius: 50%"
+          class="block q-mx-auto q-mt-md"
+          v-if="userInfo.avatar_url"
+        />
+        <img
           src="../assets/default_avatar.png"
           alt="display picture"
           height="200"
           width="200"
           style="border-radius: 50%"
           class="block q-mx-auto q-mt-md"
+          v-else
         />
+
         <div class="text-h6">{{ userInfo.name }}</div>
         <div class="text-subtitle2">
           {{ userInfo.isTyping ? "typing..." : onlineStatus }}

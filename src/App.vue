@@ -6,7 +6,7 @@
 </template>
 
 <script>
-// Development pattern. since you are not using statemanagment
+// Development pattern. since you are not using state management
 // store data for a component that always mounts and unmounts
 // in their immediate parent component. In this way data is available
 // to components that are directly linked to it without hitting the endpoint

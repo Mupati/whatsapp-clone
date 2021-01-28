@@ -9,6 +9,7 @@
       <ChatList
         v-if="leftComponent === 'chat-list' && contactedUsers"
         :users="contactedUsers"
+        :authUser="user"
         @handleLeftNavigation="handleLeftNavigation"
         @selectUser="handleSelectUser"
       />
@@ -46,7 +47,6 @@
 <script>
 // import Peer from "simple-peer";
 import Echo from "laravel-echo";
-import axios from "axios";
 import { formatRelative, parseISO } from "date-fns";
 import { getUser, getContactedUsers, getToken, Api } from "../api";
 
@@ -157,19 +157,18 @@ export default {
         authorizer: channel => {
           return {
             authorize: (socketId, callback) => {
-              axios
-                .post(
-                  `${process.env.VUE_APP_BASE_URL}/broadcasting/auth`,
-                  {
-                    socket_id: socketId,
-                    channel_name: channel.name
-                  },
-                  {
-                    headers: {
-                      Authorization: `Bearer ${getToken()}`
-                    }
+              Api.post(
+                `${process.env.VUE_APP_BASE_URL}/broadcasting/auth`,
+                {
+                  socket_id: socketId,
+                  channel_name: channel.name
+                },
+                {
+                  headers: {
+                    Authorization: `Bearer ${getToken()}`
                   }
-                )
+                }
+              )
                 .then(response => {
                   callback(false, response.data);
                 })

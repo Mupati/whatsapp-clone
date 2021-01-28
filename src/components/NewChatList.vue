@@ -65,7 +65,12 @@
         >
           <q-item-section avatar>
             <q-avatar color="primary" text-color="white" size="48px">
-              {{ contact.name | userAvatar }}
+              <img
+                :src="contact.avatar_url"
+                alt="user-dp"
+                v-if="contact.avatar_url"
+              />
+              <span v-else> {{ contact.name | userAvatar }}</span>
             </q-avatar>
           </q-item-section>
 
