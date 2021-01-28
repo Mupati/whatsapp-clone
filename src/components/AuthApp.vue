@@ -112,13 +112,27 @@ export default {
     fetchContactedUsers() {
       return getContactedUsers()
         .then(res => {
-          this.contactedUsers = res.data;
+          this.contactedUsers = res.data.map(obj => ({
+            ...obj,
+            avatar_url: this.getUserDp(obj.avatar_path)
+          }));
         })
         .catch(err => {
           console.log(err);
         });
     },
 
+    // The direct query builder doesn't get us the avatar_url attribute in the contacted_users query
+    // so we just have to compute it manually and pass it over to the other components to maintain uniformity
+    // this will not be needed when I sort out the query from the backend to use Eloquent
+
+    /// This is kind of intensive computation
+    getUserDp(avatar_path) {
+      if (avatar_path) {
+        return `https://${process.env.VUE_APP_AWS_BUCKET}.s3.amazonaws.com/${avatar_path}`;
+      }
+      return avatar_path;
+    },
     handleLeftNavigation(leftComponentName) {
       this.leftComponent = leftComponentName;
     },

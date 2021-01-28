@@ -12,7 +12,12 @@
     <q-card flat bordered class="card-bg">
       <q-card-section class="q-pt-none">
         <div class="dp-container relative-position q-mt-md q-mb-xl q-mx-auto">
-          <q-avatar style="width: 200px; height: 200px">
+          <q-avatar
+            style="width: 200px; height: 200px"
+            color="primary"
+            text-color="white"
+            font-size="3em"
+          >
             <img
               :src="authUser.avatar_url"
               alt="user-dp"
@@ -22,15 +27,7 @@
               class="block cursor-pointer user-dp"
               v-if="authUser.avatar_url"
             />
-            <img
-              src="../assets/default_avatar.png"
-              alt="user-dp"
-              height="200"
-              width="200"
-              style="border-radius: 50%"
-              class="block cursor-pointer user-dp"
-              v-else
-            />
+            <span v-else> {{ authUser.name | userAvatar }}</span>
             <q-file
               v-model="newDp"
               label="Standard"
@@ -125,7 +122,16 @@ export default {
       newDp: null
     };
   },
-
+  filters: {
+    // It can be moved later to a global level
+    // the Avatar itself can be extracted into a component on it's own when refactoring
+    userAvatar(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+    }
+  },
   methods: {
     navigateBack() {
       this.$emit("handleLeftNavigation");

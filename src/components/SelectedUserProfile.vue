@@ -8,24 +8,23 @@
     <!-- About - Image and Last seen -->
     <q-card flat bordered class="card-bg">
       <q-card-section class="q-pt-none q-mx-auto">
-        <img
-          :src="userInfo.avatar_url"
-          alt="user-dp"
-          height="200"
-          width="200"
-          style="border-radius: 50%"
-          class="block q-mx-auto q-mt-md"
-          v-if="userInfo.avatar_url"
-        />
-        <img
-          src="../assets/default_avatar.png"
-          alt="display picture"
-          height="200"
-          width="200"
-          style="border-radius: 50%"
-          class="block q-mx-auto q-mt-md"
-          v-else
-        />
+        <q-avatar
+          style="width: 200px; height: 200px"
+          color="primary"
+          text-color="white"
+          font-size="3em"
+        >
+          <img
+            :src="userInfo.avatar_url"
+            alt="user-dp"
+            height="200"
+            width="200"
+            style="border-radius: 50%"
+            class="block"
+            v-if="userInfo.avatar_url"
+          />
+          <span v-else> {{ userInfo.name | userAvatar }}</span>
+        </q-avatar>
 
         <div class="text-h6">{{ userInfo.name }}</div>
         <div class="text-subtitle2">
@@ -80,6 +79,17 @@ export default {
     return {
       isMutedNotification: false
     };
+  },
+
+  filters: {
+    // It can be moved later to a global level
+    // the Avatar itself can be extracted into a component on it's own when refactoring
+    userAvatar(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+    }
   },
   methods: {
     hideRightSection() {

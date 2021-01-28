@@ -4,13 +4,17 @@
       class="chat-area-toolbar cursor-pointer"
       @click="selectMenu('user-profile')"
     >
-      <q-avatar class="q-ml-sm cursor-pointer">
+      <q-avatar
+        class="q-ml-sm cursor-pointer"
+        color="primary"
+        text-color="white"
+      >
         <img
           :src="userInfo.avatar_url"
           alt="user-dp"
           v-if="userInfo.avatar_url"
         />
-        <img src="../assets/default_avatar.png" alt="user-dp" v-else />
+        <span v-else> {{ userInfo.name | userAvatar }}</span>
       </q-avatar>
       <q-item>
         <q-item-section>
@@ -187,6 +191,16 @@ export default {
     }
   },
 
+  filters: {
+    // It can be moved later to a global level
+    // the Avatar itself can be extracted into a component on it's own when refactoring
+    userAvatar(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase();
+    }
+  },
   methods: {
     messageTime(datetime) {
       return getMessageTime(datetime);
