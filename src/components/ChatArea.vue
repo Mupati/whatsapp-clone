@@ -262,7 +262,6 @@ export default {
         "SendPrivateWossopMessage",
         ({ message }) => {
           this.messages.push(message);
-          this.$emit("reorderChatList", message);
         }
       );
     }

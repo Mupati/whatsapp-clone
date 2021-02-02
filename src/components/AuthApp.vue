@@ -29,7 +29,6 @@
         :allMessages="allMessages"
         :messagingChannel="onlineChannel"
         :authUserId="user.id"
-        @reorderChatList="reorderChatList"
       />
       <NoSelectedMessage v-else />
     </div>
@@ -105,6 +104,7 @@ export default {
       try {
         const res = await getUser();
         this.user = res.data;
+        this.initializePrivateChatListener(res.data.id);
       } catch (error) {
         console.log(error);
       }
@@ -145,9 +145,14 @@ export default {
 
     handleSelectUser(userInfo) {
       this.isUserSelected = true;
-      // this.selectedUserInfo = userInfo;
       Object.assign(this.selectedUserInfo, userInfo);
       this.fetchMessages(userInfo.id);
+
+      // update unread count
+      let userIndex = this.contactedUsers.findIndex(
+        user => user.id === userInfo.id
+      );
+      if (userIndex >= 0) this.contactedUsers[userIndex].unread_count = 0;
     },
 
     // when a new message comes in, you reorder the list
@@ -158,10 +163,11 @@ export default {
     // 1. Use JS to reorder the chat list
     // 2. Fetch the contacted users again. In this case if a user is not present on the current chat list
     // they are also fetched
-    reorderChatList(e) {
-      console.log("reordering list");
-      console.log(e);
-    },
+    // async reorderChatList(e) {
+    //   console.log("new message", e);
+    //   const res = await getContactedUsers();
+    //   Object.assign(this.contactedUsers, res.data);
+    // },
 
     async fetchMessages(id) {
       Api.get(`/message/${id}`, {
@@ -261,11 +267,19 @@ export default {
           let typingUserIndex = this.contactedUsers.findIndex(
             singleUser => singleUser.id === e.sender
           );
-          this.$set(this.contactedUsers[typingUserIndex], "isTyping", true);
+          if (typingUserIndex >= 0) {
+            this.$set(this.contactedUsers[typingUserIndex], "isTyping", true);
+          }
 
           // reset timer
           setTimeout(() => {
-            this.$set(this.contactedUsers[typingUserIndex], "isTyping", false);
+            if (typingUserIndex >= 0) {
+              this.$set(
+                this.contactedUsers[typingUserIndex],
+                "isTyping",
+                false
+              );
+            }
           }, 2000);
         }
       });
@@ -290,6 +304,101 @@ export default {
       // });
     },
 
+    // Private message listener
+    initializePrivateChatListener(userId) {
+      window.Echo.private(`private-chat-channel.${userId}`).listen(
+        "SendPrivateWossopMessage",
+        async ({ message }) => {
+          // The conditional statements need massive refactoring
+
+          // if the sender is the authenticated user
+          const isAuthUserSender = message.sender === userId;
+
+          // if the autherUser is the receiver
+          if (isAuthUserSender) {
+            // find the index of the receiver
+            // if they are already in the chat list, it means you have already contacted them
+            // if not, it just means, he is a new user and must fetch your chatlist again
+
+            const receiverIndex = this.contactedUsers.findIndex(
+              user => user.id === message.receiver
+            );
+            // that is if the user is present, Update the message and created_at
+            if (receiverIndex >= 0) {
+              this.contactedUsers[receiverIndex].message = message.message;
+              this.contactedUsers[receiverIndex].created_at =
+                message.created_at;
+            } else {
+              // this means the user is not in this list
+              // so fetch the contactedUsers data again
+              let updatedUsersList = await getContactedUsers();
+              this.contactedUsers = updatedUsersList.data;
+            }
+            // if the receiver is not the currently selected user or there is no currently selected user
+            // update the unread_count
+            if (
+              receiverIndex >= 0 &&
+              parseInt(this.contactedUsers[receiverIndex].id) !==
+                parseInt(this.selectedUserInfo.id)
+            ) {
+              this.contactedUsers[receiverIndex].unread_count += 1;
+            }
+
+            // if user the receiver is not at the top of the list, reorder the list
+            if (receiverIndex > 0) {
+              // reorder the list
+              // 1. get the value
+              // 2. remove it from the contactedUsers using split
+              // 3. Add to the top using unshift.
+              let valueStore = this.contactedUsers[receiverIndex];
+              this.contactedUsers.splice(receiverIndex, 1);
+              this.contactedUsers.unshift(valueStore);
+            }
+          }
+          // if auth user is not the sender
+          else {
+            // find the index of the sender
+            // if they are already in the chat list, it means you have already contacted them
+            // if not, it just means, he is a new user and must fetch your chatlist again
+            const senderIndex = this.contactedUsers.findIndex(
+              user => user.id === message.sender
+            );
+
+            // that is if the user is present, Update the message and created_at
+            if (senderIndex >= 0) {
+              this.contactedUsers[senderIndex].message = message.message;
+              this.contactedUsers[senderIndex].created_at = message.created_at;
+            } else {
+              // this means the user is not in this list
+              // so fetch the contactedUsers data again
+              let updatedUsersList = await getContactedUsers();
+              this.contactedUsers = updatedUsersList.data;
+            }
+            // if the sender is not the currently selected user or there is no currently selected user
+            // update the unread_count
+            if (
+              senderIndex >= 0 &&
+              parseInt(this.contactedUsers[senderIndex].id) !==
+                parseInt(this.selectedUserInfo.id)
+            ) {
+              this.contactedUsers[senderIndex].unread_count += 1;
+            }
+
+            // if user the sender is not at the top of the list, reorder the list
+            if (senderIndex > 0) {
+              // reorder the list
+              // 1. get the value
+              // 2. remove it from the contactedUsers using split
+              // 3. Add to the top using unshift.
+              let valueStore = this.contactedUsers[senderIndex];
+              this.contactedUsers.splice(senderIndex, 1);
+              this.contactedUsers.unshift(valueStore);
+            }
+          }
+        }
+      );
+    },
+
     disconnectChannel() {
       this.onlineChannel.pusher.channels.channels[
         "presence-wossop-channel"
@@ -304,6 +413,9 @@ export default {
     this.fetchContactedUsers();
     this.initializeChannel();
     this.initializeChannelListeners();
+
+    // starting private listeners
+    if (isUser) this.initializePrivateChatListener(this.user.id);
   },
 
   beforeDestroy() {
