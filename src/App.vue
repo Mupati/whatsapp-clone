@@ -17,7 +17,7 @@
 import AuthApp from "./components/AuthApp";
 import NonAuthApp from "./components/NonAuthApp";
 
-import { getToken, clearToken } from "./api";
+import { getToken, clearToken, getUser } from "./api";
 export default {
   name: "MainApp",
   components: {
@@ -46,11 +46,22 @@ export default {
       this.isLoggedIn = true;
       this.authUser = user;
     });
+
+    this.$root.$on("updateProfile", () => {
+      getUser()
+        .then(res => {
+          Object.assign(this.authUser, res.data);
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    });
   },
 
   beforeDestroy() {
     this.$root.$off("loginUser");
     this.$root.$off("logoutUser");
+    this.$root.$off("updateProfile");
   }
 };
 </script>

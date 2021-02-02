@@ -237,7 +237,7 @@ export default {
 
     userTyping() {
       this.messagingChannel.whisper("typing", {
-        message: this.new_message.trim(),
+        // message: this.new_message.trim(),
         sender: this.authUserId,
         receiver: this.userInfo.id
       });
@@ -255,12 +255,23 @@ export default {
           this.messages.push(message);
         }
       });
+    },
+
+    initializePrivateChatChannel() {
+      window.Echo.private(`private-chat-channel.${this.authUserId}`).listen(
+        "SendPrivateWossopMessage",
+        ({ message }) => {
+          this.messages.push(message);
+          this.$emit("reorderChatList", message);
+        }
+      );
     }
   },
 
   mounted() {
     this.scrollToChatBottom();
-    this.listenForNewMessages();
+    // this.listenForNewMessages();
+    this.initializePrivateChatChannel();
   },
 
   updated() {

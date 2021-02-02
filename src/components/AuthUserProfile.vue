@@ -19,15 +19,15 @@
             font-size="3em"
           >
             <img
-              :src="authUser.avatar_url"
+              :src="user.avatar_url"
               alt="user-dp"
               height="200"
               width="200"
               style="border-radius: 50%"
               class="block cursor-pointer user-dp"
-              v-if="authUser.avatar_url"
+              v-if="user.avatar_url"
             />
-            <span v-else> {{ authUser.name | userAvatar }}</span>
+            <span v-else> {{ user.name | userAvatar }}</span>
             <q-file
               v-model="newDp"
               label="Standard"
@@ -90,7 +90,7 @@
           </div>
         </div>
         <div class="text-subtitle2">Your Name</div>
-        <div class="text-subtitle1">{{ authUser.name }}</div>
+        <div class="text-subtitle1">{{ user.name }}</div>
       </q-card-section>
     </q-card>
 
@@ -102,8 +102,17 @@
       </q-card-section>
       <q-card-section>
         <div class="text-subtitle2">About</div>
-        <div class="text-subtitle1">
-          {{ authUser.about || "Hi, there I use Wossop" }}
+        <div class="text-subtitle1 cursor-pointer">
+          {{ user.about || "Hi, there I use Wossop" }}
+          <q-popup-edit v-model="user.about" @save="updateAboutInfo">
+            <q-input
+              v-model="user.about"
+              dense
+              autofocus
+              counter
+              color="dark"
+            />
+          </q-popup-edit>
         </div>
       </q-card-section>
     </q-card>
@@ -132,6 +141,12 @@ export default {
         .toUpperCase();
     }
   },
+
+  computed: {
+    user() {
+      return this.authUser;
+    }
+  },
   methods: {
     navigateBack() {
       this.$emit("handleLeftNavigation");
@@ -149,10 +164,37 @@ export default {
       this.$refs.uploadDialog.pickFiles();
     },
 
+    updateAboutInfo(newAbout) {
+      Api.post(
+        "/update-info",
+        {
+          field: "about",
+          value: newAbout
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getToken()}`
+          }
+        }
+      )
+        .then(res => {
+          console.log(res.data);
+          this.$root.$emit("updateProfile");
+          this.$q.notify({
+            type: "positive",
+            message: "Display picture updated",
+            position: "bottom-left"
+          });
+        })
+        .catch(err => {
+          console.log(err);
+        });
+    },
+
     uploadPhoto() {
       const fd = new FormData();
 
-      fd.append("id", this.authUser.id);
+      fd.append("id", this.user.id);
       fd.append("image", this.newDp);
 
       Api.post("/update-dp", fd, {
@@ -164,6 +206,12 @@ export default {
         .then(res => {
           console.log(res);
           // emit event to fetch user data again on the AuthApp
+          this.$root.$emit("updateProfile");
+          this.$q.notify({
+            type: "positive",
+            message: "Display picture updated",
+            position: "bottom-left"
+          });
         })
         .catch(err => {
           console.log(err);

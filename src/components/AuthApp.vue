@@ -29,6 +29,7 @@
         :allMessages="allMessages"
         :messagingChannel="onlineChannel"
         :authUserId="user.id"
+        @reorderChatList="reorderChatList"
       />
       <NoSelectedMessage v-else />
     </div>
@@ -144,8 +145,22 @@ export default {
 
     handleSelectUser(userInfo) {
       this.isUserSelected = true;
-      this.selectedUserInfo = userInfo;
+      // this.selectedUserInfo = userInfo;
+      Object.assign(this.selectedUserInfo, userInfo);
       this.fetchMessages(userInfo.id);
+    },
+
+    // when a new message comes in, you reorder the list
+    // if the receiver is not the currently selected user
+    // you update the unread count attached to the user with the reordering
+
+    // Two implementation
+    // 1. Use JS to reorder the chat list
+    // 2. Fetch the contacted users again. In this case if a user is not present on the current chat list
+    // they are also fetched
+    reorderChatList(e) {
+      console.log("reordering list");
+      console.log(e);
     },
 
     async fetchMessages(id) {
@@ -261,17 +276,18 @@ export default {
       // the lastest messages come to the top.
 
       // When the authenticated user sends or receives a message, fetchContactedUsers
-      this.onlineChannel.listen("SendWossopMessage", async ({ message }) => {
-        if (
-          message.sender === this.user.id ||
-          message.receiver === this.user.id
-        ) {
-          console.log("contactedUsers", this.contactedUsers);
-          const res = await getContactedUsers();
-          this.contactedUsers = res.data;
-          console.log("updatedContactedUsers", this.contactedUsers);
-        }
-      });
+
+      // this.onlineChannel.listen("SendWossopMessage", async ({ message }) => {
+      //   if (
+      //     message.sender === this.user.id ||
+      //     message.receiver === this.user.id
+      //   ) {
+      //     console.log("contactedUsers", this.contactedUsers);
+      //     const res = await getContactedUsers();
+      //     console.log("send wossop message");
+      //     Object.assign(this.contactedUsers, res.data);
+      //   }
+      // });
     },
 
     disconnectChannel() {
