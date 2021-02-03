@@ -236,11 +236,12 @@ export default {
     },
 
     userTyping() {
-      this.messagingChannel.whisper("typing", {
-        // message: this.new_message.trim(),
-        sender: this.authUserId,
-        receiver: this.userInfo.id
-      });
+      setTimeout(() => {
+        this.messagingChannel.whisper("typing", {
+          sender: this.authUserId,
+          receiver: this.userInfo.id
+        });
+      }, 1000);
     },
 
     listenForNewMessages() {

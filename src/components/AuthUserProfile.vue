@@ -165,6 +165,7 @@ export default {
     },
 
     updateAboutInfo(newAbout) {
+      console.log("new About", newAbout);
       Api.post(
         "/update-info",
         {
@@ -173,16 +174,16 @@ export default {
         },
         {
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${getToken()}`
           }
         }
       )
-        .then(res => {
-          console.log(res.data);
+        .then(() => {
           this.$root.$emit("updateProfile");
           this.$q.notify({
             type: "positive",
-            message: "Display picture updated",
+            message: "About updated",
             position: "bottom-left"
           });
         })

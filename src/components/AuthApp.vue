@@ -85,6 +85,7 @@ export default {
       const userIndex = this.onlineUsers.findIndex(
         user => user.id === this.selectedUserInfo.id
       );
+
       if (userIndex < 0) {
         // check whether they've recorded their last login before you parse it
         let last_online = Boolean(this.selectedUserInfo.last_login_at);
@@ -134,6 +135,7 @@ export default {
       }
       return avatar_path;
     },
+
     handleLeftNavigation(leftComponentName) {
       this.leftComponent = leftComponentName;
     },
@@ -145,7 +147,7 @@ export default {
 
     handleSelectUser(userInfo) {
       this.isUserSelected = true;
-      Object.assign(this.selectedUserInfo, userInfo);
+      this.selectedUserInfo = userInfo;
       this.fetchMessages(userInfo.id);
 
       // update unread count
@@ -154,20 +156,6 @@ export default {
       );
       if (userIndex >= 0) this.contactedUsers[userIndex].unread_count = 0;
     },
-
-    // when a new message comes in, you reorder the list
-    // if the receiver is not the currently selected user
-    // you update the unread count attached to the user with the reordering
-
-    // Two implementation
-    // 1. Use JS to reorder the chat list
-    // 2. Fetch the contacted users again. In this case if a user is not present on the current chat list
-    // they are also fetched
-    // async reorderChatList(e) {
-    //   console.log("new message", e);
-    //   const res = await getContactedUsers();
-    //   Object.assign(this.contactedUsers, res.data);
-    // },
 
     async fetchMessages(id) {
       Api.get(`/message/${id}`, {
@@ -243,9 +231,6 @@ export default {
         this.onlineUsers.splice(userIndex, 1);
 
         await this.$nextTick();
-        // let updatedOnlineUsers = this.onlineUsers.splice(userIndex, 1);
-        // this.onlineUsers = updatedOnlineUsers;
-        // console.log("Leaving Second", updatedOnlineUsers);
       });
 
       // Update online status of user who logs out
@@ -283,117 +268,62 @@ export default {
           }, 2000);
         }
       });
-
-      // I don't know how best to go about this, to have an optimized solution
-      // There are a lot of API calls which must be changed later.
-      // What I want to do is update the contacted Users in the ChatList so that
-      // the lastest messages come to the top.
-
-      // When the authenticated user sends or receives a message, fetchContactedUsers
-
-      // this.onlineChannel.listen("SendWossopMessage", async ({ message }) => {
-      //   if (
-      //     message.sender === this.user.id ||
-      //     message.receiver === this.user.id
-      //   ) {
-      //     console.log("contactedUsers", this.contactedUsers);
-      //     const res = await getContactedUsers();
-      //     console.log("send wossop message");
-      //     Object.assign(this.contactedUsers, res.data);
-      //   }
-      // });
     },
 
+    // this reorders the chat list when a new message comes in
+    // and updates the unread count if the person is not the currently selected user
+    async handleChatListReorder(userIndex, message) {
+      // that is if the user is present, Update the message and created_at
+      if (userIndex >= 0) {
+        this.contactedUsers[userIndex].message = message.message;
+        this.contactedUsers[userIndex].created_at = message.created_at;
+      } else {
+        // this means the user is not in this list
+        // so fetch the contactedUsers data again
+        let updatedUsersList = await getContactedUsers();
+        this.contactedUsers = updatedUsersList.data;
+      }
+      // if the receiver is not the currently selected user or there is no currently selected user
+      // update the unread_count
+      if (
+        userIndex >= 0 &&
+        parseInt(this.contactedUsers[userIndex].id) !==
+          parseInt(this.selectedUserInfo.id)
+      ) {
+        this.contactedUsers[userIndex].unread_count += 1;
+      }
+
+      // if user the receiver is not at the top of the list, reorder the list
+      if (userIndex > 0) {
+        // reorder the list
+        // 1. get the value
+        // 2. remove it from the contactedUsers using split
+        // 3. Add to the top using unshift.
+        let valueStore = this.contactedUsers[userIndex];
+        this.contactedUsers.splice(userIndex, 1);
+        this.contactedUsers.unshift(valueStore);
+      }
+    },
     // Private message listener
     initializePrivateChatListener(userId) {
       window.Echo.private(`private-chat-channel.${userId}`).listen(
         "SendPrivateWossopMessage",
         async ({ message }) => {
-          // The conditional statements need massive refactoring
-
           // if the sender is the authenticated user
           const isAuthUserSender = message.sender === userId;
 
-          // if the autherUser is the receiver
+          const senderIndex = this.contactedUsers.findIndex(
+            user => user.id === message.sender
+          );
+
+          const receiverIndex = this.contactedUsers.findIndex(
+            user => user.id === message.receiver
+          );
+
           if (isAuthUserSender) {
-            // find the index of the receiver
-            // if they are already in the chat list, it means you have already contacted them
-            // if not, it just means, he is a new user and must fetch your chatlist again
-
-            const receiverIndex = this.contactedUsers.findIndex(
-              user => user.id === message.receiver
-            );
-            // that is if the user is present, Update the message and created_at
-            if (receiverIndex >= 0) {
-              this.contactedUsers[receiverIndex].message = message.message;
-              this.contactedUsers[receiverIndex].created_at =
-                message.created_at;
-            } else {
-              // this means the user is not in this list
-              // so fetch the contactedUsers data again
-              let updatedUsersList = await getContactedUsers();
-              this.contactedUsers = updatedUsersList.data;
-            }
-            // if the receiver is not the currently selected user or there is no currently selected user
-            // update the unread_count
-            if (
-              receiverIndex >= 0 &&
-              parseInt(this.contactedUsers[receiverIndex].id) !==
-                parseInt(this.selectedUserInfo.id)
-            ) {
-              this.contactedUsers[receiverIndex].unread_count += 1;
-            }
-
-            // if user the receiver is not at the top of the list, reorder the list
-            if (receiverIndex > 0) {
-              // reorder the list
-              // 1. get the value
-              // 2. remove it from the contactedUsers using split
-              // 3. Add to the top using unshift.
-              let valueStore = this.contactedUsers[receiverIndex];
-              this.contactedUsers.splice(receiverIndex, 1);
-              this.contactedUsers.unshift(valueStore);
-            }
-          }
-          // if auth user is not the sender
-          else {
-            // find the index of the sender
-            // if they are already in the chat list, it means you have already contacted them
-            // if not, it just means, he is a new user and must fetch your chatlist again
-            const senderIndex = this.contactedUsers.findIndex(
-              user => user.id === message.sender
-            );
-
-            // that is if the user is present, Update the message and created_at
-            if (senderIndex >= 0) {
-              this.contactedUsers[senderIndex].message = message.message;
-              this.contactedUsers[senderIndex].created_at = message.created_at;
-            } else {
-              // this means the user is not in this list
-              // so fetch the contactedUsers data again
-              let updatedUsersList = await getContactedUsers();
-              this.contactedUsers = updatedUsersList.data;
-            }
-            // if the sender is not the currently selected user or there is no currently selected user
-            // update the unread_count
-            if (
-              senderIndex >= 0 &&
-              parseInt(this.contactedUsers[senderIndex].id) !==
-                parseInt(this.selectedUserInfo.id)
-            ) {
-              this.contactedUsers[senderIndex].unread_count += 1;
-            }
-
-            // if user the sender is not at the top of the list, reorder the list
-            if (senderIndex > 0) {
-              // reorder the list
-              // 1. get the value
-              // 2. remove it from the contactedUsers using split
-              // 3. Add to the top using unshift.
-              let valueStore = this.contactedUsers[senderIndex];
-              this.contactedUsers.splice(senderIndex, 1);
-              this.contactedUsers.unshift(valueStore);
-            }
+            this.handleChatListReorder(receiverIndex, message);
+          } else {
+            this.handleChatListReorder(senderIndex, message);
           }
         }
       );

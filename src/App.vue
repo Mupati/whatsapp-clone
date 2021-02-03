@@ -50,7 +50,11 @@ export default {
     this.$root.$on("updateProfile", () => {
       getUser()
         .then(res => {
-          Object.assign(this.authUser, res.data);
+          if (this.authUser) {
+            Object.assign(this.authUser, res.data);
+          } else {
+            this.authUser = res.data;
+          }
         })
         .catch(err => {
           console.log(err);
