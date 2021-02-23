@@ -111,7 +111,7 @@
           color: '#f1f1f2'
         }"
         bg-color="dark"
-        v-model="new_message"
+        v-model="newUserMessage[userInfo.id]"
         @keyup="userTyping"
         @keyup.enter="sendMessage"
       >
@@ -157,7 +157,7 @@
             round
             dense
             icon="send"
-            v-if="new_message"
+            v-if="newUserMessage[userInfo.id]"
             style="color: #b1b3b5"
             @click="sendMessage"
           />
@@ -181,8 +181,10 @@ export default {
   ],
   data() {
     return {
-      new_message: null,
-      isShowingChatMenu: false
+      isShowingChatMenu: false,
+      newUserMessage: {
+        [this.userInfo.id]: null
+      }
     };
   },
   computed: {
@@ -227,7 +229,10 @@ export default {
     async sendMessage() {
       Api.post(
         "/message",
-        { receiver_id: this.userInfo.id, message: this.new_message.trim() },
+        {
+          receiver_id: this.userInfo.id,
+          message: this.newUserMessage[this.userInfo.id].trim()
+        },
         {
           headers: {
             Authorization: `Bearer ${getToken()}`
@@ -235,7 +240,7 @@ export default {
         }
       )
         .then(() => {
-          this.new_message = null;
+          this.newUserMessage[this.userInfo.id] = null;
           this.scrollToChatBottom();
         })
         .catch(err => {

@@ -90,7 +90,7 @@
           </div>
         </div>
         <div class="text-subtitle2">Your Name</div>
-        <div class="text-subtitle1">{{ user.name }}</div>
+        <div class="text-subtitle1">{{ user.name | capitalize }}</div>
       </q-card-section>
     </q-card>
 
@@ -103,7 +103,7 @@
       <q-card-section>
         <div class="text-subtitle2">About</div>
         <div class="text-subtitle1 cursor-pointer">
-          {{ user.about || "Hi, there I use Wossop" }}
+          {{ user.about ? user.about : "Hi, there I use Wossop" }}
           <q-popup-edit v-model="user.about" @save="updateAboutInfo">
             <q-input
               v-model="user.about"
@@ -139,6 +139,14 @@ export default {
         .trim()
         .charAt(0)
         .toUpperCase();
+    },
+
+    capitalize(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase()
+        .concat(name.slice(1));
     }
   },
 
