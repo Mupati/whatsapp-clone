@@ -6,6 +6,7 @@
         @handleLeftNavigation="leftComponent = 'chat-list'"
         :authUser="user"
       />
+      <!-- ChatList fully renders when the contacted users data is available from the API call. We may show loading indicator -->
       <ChatList
         v-if="leftComponent === 'chat-list' && contactedUsers"
         :users="contactedUsers"
@@ -14,7 +15,7 @@
         @selectUser="handleSelectUser"
       />
       <NewChatList
-        v-if="leftComponent === 'new-chat-list' && contactedUsers"
+        v-if="leftComponent === 'new-chat-list'"
         @handleLeftNavigation="leftComponent = 'chat-list'"
         @selectUser="handleSelectUser"
       />

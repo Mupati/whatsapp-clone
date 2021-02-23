@@ -75,10 +75,12 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label class="text-white">{{ contact.name }}</q-item-label>
-            <q-item-label class="text-grey" caption lines="1"
-              >About the user</q-item-label
-            >
+            <q-item-label class="text-white">{{
+              contact.name | capitalize
+            }}</q-item-label>
+            <q-item-label class="text-grey" caption lines="1">{{
+              contact.about ? contact.about : "Hey there!, I use Wossop"
+            }}</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -104,6 +106,13 @@ export default {
         .trim()
         .charAt(0)
         .toUpperCase();
+    },
+    capitalize(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase()
+        .concat(name.slice(1));
     }
   },
   methods: {

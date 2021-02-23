@@ -19,7 +19,7 @@
       <q-item>
         <q-item-section>
           <q-item-label class="text-subtitle1" style="color: #fff">{{
-            userInfo.name
+            userInfo.name | capitalize
           }}</q-item-label>
           <q-item-label caption class="text-primary">{{
             userInfo.isTyping ? "typing..." : onlineStatus
@@ -199,6 +199,14 @@ export default {
         .trim()
         .charAt(0)
         .toUpperCase();
+    },
+
+    capitalize(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase()
+        .concat(name.slice(1));
     }
   },
   methods: {

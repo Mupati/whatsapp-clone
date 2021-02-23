@@ -108,7 +108,9 @@
           </q-item-section>
 
           <q-item-section>
-            <q-item-label class="text-white">{{ contact.name }}</q-item-label>
+            <q-item-label class="text-white">{{
+              contact.name | capitalize
+            }}</q-item-label>
             <q-item-label
               class="text-grey"
               caption
@@ -155,6 +157,14 @@ export default {
         .trim()
         .charAt(0)
         .toUpperCase();
+    },
+
+    capitalize(name) {
+      return name
+        .trim()
+        .charAt(0)
+        .toUpperCase()
+        .concat(name.slice(1));
     }
   },
 
