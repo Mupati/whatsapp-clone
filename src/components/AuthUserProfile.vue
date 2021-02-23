@@ -51,7 +51,7 @@
                   clickable
                   v-close-popup
                   class="q-pl-lg"
-                  @click="viewPhoto"
+                  @click="isVisibleDpModal = true"
                 >
                   <q-item-section>View photo</q-item-section>
                 </q-item>
@@ -116,6 +116,12 @@
         </div>
       </q-card-section>
     </q-card>
+    <DpViewingModal
+      v-if="isVisibleDpModal"
+      :image="user.avatar_url"
+      :name="user.name"
+      @close="isVisibleDpModal = false"
+    />
   </section>
 </template>
 
@@ -124,11 +130,15 @@ import { Api, getToken } from "../api";
 export default {
   name: "AuthUserProfile",
   props: ["authUser"],
+  components: {
+    DpViewingModal: () => import("./DpViewingModal")
+  },
   data() {
     return {
       isMutedNotification: false,
       isActiveChangeDp: false,
-      newDp: null
+      newDp: null,
+      isVisibleDpModal: false
     };
   },
   filters: {
@@ -158,10 +168,6 @@ export default {
   methods: {
     navigateBack() {
       this.$emit("handleLeftNavigation");
-    },
-
-    viewPhoto() {
-      console.log("view photo");
     },
 
     takePhoto() {

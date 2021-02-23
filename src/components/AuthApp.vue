@@ -42,6 +42,7 @@
         :onlineStatus="selectedUserOnlineStatus"
       />
     </div>
+    <!-- <DpViewingModal @close="showFullscreenModal = false" /> -->
   </section>
 </template>
 
@@ -63,6 +64,7 @@ export default {
     ChatArea: () => import("./ChatArea.vue"),
     SelectedUserProfile: () => import("./SelectedUserProfile"),
     AuthUserProfile: () => import("./AuthUserProfile")
+    // DpViewingModal: () => import("./DpViewingModal")
   },
 
   data() {
@@ -78,6 +80,7 @@ export default {
       onlineUsers: [],
       allMessages: [],
       userTyping: false
+      // showFullscreenModal: false
     };
   },
 

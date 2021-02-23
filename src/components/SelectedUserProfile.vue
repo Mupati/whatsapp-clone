@@ -14,7 +14,8 @@
             color="primary"
             text-color="white"
             font-size="3em"
-            class="block q-mx-auto"
+            class="block q-mx-auto cursor-pointer"
+            @click="isVisibleDpModal = true"
           >
             <img
               :src="userInfo.avatar_url"
@@ -70,6 +71,12 @@
         </q-list>
       </q-card-section>
     </q-card>
+    <DpViewingModal
+      v-if="isVisibleDpModal"
+      :image="userInfo.avatar_url"
+      :name="userInfo.name"
+      @close="isVisibleDpModal = false"
+    />
   </section>
 </template>
 
@@ -77,9 +84,13 @@
 export default {
   name: "SelectedUserProfile",
   props: ["userInfo", "onlineStatus"],
+  components: {
+    DpViewingModal: () => import("./DpViewingModal")
+  },
   data() {
     return {
-      isMutedNotification: false
+      isMutedNotification: false,
+      isVisibleDpModal: false
     };
   },
 
@@ -112,7 +123,7 @@ export default {
 <style lang="scss" scoped>
 #wrapper {
   border-left: 1px solid #f1f1f21f;
-  background-color: #0d1418;
+  // background-color: #0d1418;
 }
 .profile-toolbar {
   color: #b1b3b5;
