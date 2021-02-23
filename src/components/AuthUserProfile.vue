@@ -33,8 +33,10 @@
               label="Standard"
               style="display: none"
               ref="uploadDialog"
-              @input="uploadPhoto"
+              accept=".jpg, image/*"
+              @input="editNewDp"
             />
+            <!-- @input="uploadPhoto" -->
           </q-avatar>
           <div
             class="column justify-center items-center absolute dp-change text-center cursor-pointer"
@@ -116,6 +118,17 @@
         </div>
       </q-card-section>
     </q-card>
+
+    <!-- Fullscreen modal for editing display picture before uploading -->
+    <DpEditCanvas
+      v-if="isVisibleEditCanvas"
+      :image="base64Dp"
+      @close="isVisibleEditCanvas = false"
+      @selectNewImage="selectNewImage"
+      @uploadCroppedPhoto="uploadCroppedPhoto"
+    />
+
+    <!-- Fullscreen modal for viewing Display Picture -->
     <DpViewingModal
       v-if="isVisibleDpModal"
       :image="user.avatar_url"
@@ -131,14 +144,17 @@ export default {
   name: "AuthUserProfile",
   props: ["authUser"],
   components: {
-    DpViewingModal: () => import("./DpViewingModal")
+    DpViewingModal: () => import("./DpViewingModal"),
+    DpEditCanvas: () => import("./DpEditCanvas")
   },
   data() {
     return {
       isMutedNotification: false,
       isActiveChangeDp: false,
       newDp: null,
-      isVisibleDpModal: false
+      base64Dp: null,
+      isVisibleDpModal: false,
+      isVisibleEditCanvas: false
     };
   },
   filters: {
@@ -178,8 +194,26 @@ export default {
       this.$refs.uploadDialog.pickFiles();
     },
 
+    image2base64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      });
+    },
+
+    async editNewDp() {
+      this.base64Dp = await this.image2base64(this.newDp);
+      this.isVisibleEditCanvas = true;
+    },
+
+    selectNewImage() {
+      this.isVisibleEditCanvas = false;
+      this.showUploadDialog();
+    },
+
     updateAboutInfo(newAbout) {
-      console.log("new About", newAbout);
       Api.post(
         "/update-info",
         {
@@ -204,6 +238,36 @@ export default {
         .catch(err => {
           console.log(err);
         });
+    },
+
+    uploadCroppedPhoto(canvas) {
+      this.isVisibleEditCanvas = false;
+      const fd = new FormData();
+
+      canvas.toBlob(blob => {
+        fd.append("id", this.user.id);
+        fd.append("image", blob);
+
+        const self = this;
+        Api.post("/update-dp", fd, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Authorization: `Bearer ${getToken()}`
+          }
+        })
+          .then(() => {
+            // emit event to fetch user data again on the AuthApp
+            self.$root.$emit("updateProfile");
+            self.$q.notify({
+              type: "positive",
+              message: "Display picture updated",
+              position: "bottom-left"
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }, "image/jpeg");
     },
 
     uploadPhoto() {
